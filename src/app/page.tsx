@@ -1,22 +1,19 @@
-import Link from "next/link"
-
-import { LatestPost } from "~/app/_components/post"
 import { api, HydrateClient } from "~/trpc/server"
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" })
+import EventsContainer from "./_homePageComponents/EventsContainer"
 
-  void api.post.getLatest.prefetch()
+export default async function Home() {
+ 
 
   return (
     <HydrateClient>
-      <div>
-        {hello.greeting}
+      <div className="p-[12px] flex flex-col gap-[16px] items-center">
+        <EventsContainer mode="checkin"/>
+        <EventsContainer mode="pastTournaments"/>
+        {/* <button className="bg-green w-[80%] h-[42px] rounded-[8px] flex justify-center items-center text-white font-semibold text-[18px] box-shadow-small">
+          Create New Event
+        </button> */}
       </div>
-
-      <LatestPost />
-
-
     </HydrateClient>
   )
 }
