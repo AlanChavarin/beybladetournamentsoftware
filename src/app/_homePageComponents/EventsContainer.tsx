@@ -1,8 +1,16 @@
+import { EventType } from "~/server/db/schema"
 import EventThumbnailComponent from "../_components/EventThumbnailComponent"
+import { serverClient } from "~/server/api/serverClient"
 
-function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) {
+
+async function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) {
+
+    // get events from db, make the code work server side
+    const events: EventType[] = await serverClient.event.getAll()
+    //console.log(events)
+
   return (
-    <div className="bg-darkGray box-shadow">
+    <div className="bg-darkGray box-shadow w-full max-w-[400px]">
         <div className="flex flex-row h-[48px]">
             <div className="w-[64px] flex flex-row justify-center">
                 <div className="relative w-[41px] h-[41px] self-end">
@@ -24,7 +32,8 @@ function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) {
         </div>
 
         <div className="h-full w-full bg-white flex flex-col">
-            <EventThumbnailComponent checkin={mode === 'checkin'}/>
+            { events.map(event => <EventThumbnailComponent eventData={event} checkin={mode === 'checkin'}/>)}
+
         </div>
     </div>
   

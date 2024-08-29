@@ -19,6 +19,8 @@
     "@fortawesome/free-regular-svg-icons": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@hookform/error-message": "^2.0.1",
+    "@hookform/resolvers": "^3.9.0",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@trpc/client": "^11.0.0-rc.446",
@@ -30,6 +32,8 @@
     "postgres": "^3.4.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.0",
+    "react-toastify": "^10.0.5",
     "server-only": "^0.0.1",
     "superjson": "^2.2.1",
     "zod": "^3.23.3"

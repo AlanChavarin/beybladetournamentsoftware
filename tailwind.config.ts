@@ -10,7 +10,7 @@ export default {
         sans: ['Montserrat', "var(--font-geist-sans)", ...fontFamily.sans],
       },
       colors: {
-        'red': '#BC1F1F',
+        'specialRed': '#BC1F1F',
         'darkGray': '#242424',
         'lightGray1': '#787878',
         'lightGray2': '#C2C2C2',

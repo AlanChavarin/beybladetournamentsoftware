@@ -1,32 +1,34 @@
 import DateComponent from "./DateComponent"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {faEarthAmericas, faClock, faUser, faAnglesRight} from "@fortawesome/free-solid-svg-icons"
+import { EventType } from "~/server/db/schema"
 
-function EventThumbnailComponent({checkin}: {checkin?: boolean}) {
+function EventThumbnailComponent({checkin, eventData}: {checkin?: boolean, eventData: EventType}) {
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row w-full">
         <DateComponent/>
 
         <div className="flex flex-col font-bold justify-between py-[4px] px-[12px] border-b-[1px] border-lightGray5 w-full relative">
             <div className="text-[12px]">
-                BBX Tabletop Tavern Hasbro Stadium
+                {eventData.name}
             </div>
             <div className="text-[10px] text-lightGray4 flex flex-row gap-[4px]">
                 <FontAwesomeIcon icon={faEarthAmericas} className="w-[13px] h-[13px] text-red"/>
-                <div>Chula Vista, California</div>
+                <div>{eventData.location}</div>
             </div>
             <div className="text-[10px] text-lightGray4 flex flex-row gap-[16px]">
                 <div className="flex flex-row gap-[4px]">
                     <img src="/svgs/sword.svg" alt="" className="w-[15px] h-[15px]"/>
-                    <div>BBX</div>
+                    <div>{eventData.format}</div>
                 </div>
                 <div className="flex flex-row gap-[4px]">
                     <FontAwesomeIcon icon={faClock} className="w-[13px] h-[13px] text-red"/>
-                    <div>2:00PM</div>
+                    <div>{eventData.time && new Date(eventData.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
                 <div className="flex flex-row gap-[4px]">
                     <FontAwesomeIcon icon={faUser} className="w-[13px] h-[13px] text-red"/>
                     <div>23 Players</div>
+                    {/* TODO: get number of players from db */}
                 </div>
             </div>
 
