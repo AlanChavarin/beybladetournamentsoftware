@@ -1,12 +1,12 @@
 import { EventType } from "~/server/db/schema"
 import EventThumbnailComponent from "../_components/EventThumbnailComponent"
-import { serverClient } from "~/server/api/serverClient"
+import { api } from "~/trpc/server"
 
 
 async function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) {
 
     // get events from db, make the code work server side
-    const events: EventType[] = await serverClient.event.getAll()
+    const events: EventType[] = await api.event.getAll()
     //console.log(events)
 
   return (

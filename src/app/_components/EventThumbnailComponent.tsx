@@ -8,7 +8,7 @@ function EventThumbnailComponent({checkin, eventData}: {checkin?: boolean, event
     <div className="flex flex-row w-full">
         <DateComponent/>
 
-        <div className="flex flex-col font-bold justify-between py-[4px] px-[12px] border-b-[1px] border-lightGray5 w-full relative">
+        <div className="flex flex-col font-bold justify-between py-[4px] px-[12px] border-b-[1px] border-r-[1px] border-lightGray5 w-full relative">
             <div className="text-[12px]">
                 {eventData.name}
             </div>

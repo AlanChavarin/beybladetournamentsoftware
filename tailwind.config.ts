@@ -19,7 +19,9 @@ export default {
         'lightGray5': '#D1D1D1',
         'lightGray6': '#F5F5F5',
         'green': '#3A843A',
+        'greenHover': '#377d37',
         'darkGreen': '#123E12',
+        'darkGreenHover': '#0d2e0d',
       }
     },
   },
