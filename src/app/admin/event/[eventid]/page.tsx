@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import StandingsTab from './_components/StandingsTab'
 import SettingsTab from './_components/SettingsTab'
 import TabButton from '~/app/_components/TabButton'
+import GroupStage from './_components/GroupStage'
+import FinalStage from './_components/FinalStage'
 
 const Page = ({ params }: { params: { eventid: string } }) => {
   const { eventid } = params
@@ -26,8 +28,12 @@ const Page = ({ params }: { params: { eventid: string } }) => {
             return <StandingsTab />
         case 'Settings':
             return <SettingsTab/>
+        case 'Group Stage':
+            return <GroupStage/>
+        case 'Final Stage':
+            return <FinalStage/>
         default:
-            return <StandingsTab />
+            return <>None</>
     }
   }
 

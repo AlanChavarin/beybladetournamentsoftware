@@ -1,4 +1,6 @@
 import FontAwesomeIcon from "@fortawesome/react-fontawesome"
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+
 
 function Navbar() {
   return (
@@ -12,6 +14,16 @@ function Navbar() {
           CENTER <br/>
         </div>
         <img src="/svgs/BigRedThingy.svg" alt="" className="absolute top-0 z-[1] w-full h-full" />
+      </div>
+      <div className="absolute right-[0px] top-[50%] translate-y-[-50%] p-[12px]">
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        <SignedOut>
+          <div className="font-rubik text-[10px] bg-green rounded-[4px] px-[6px] py-[4px] box-shadow-small2">
+            <SignInButton />
+          </div>
+        </SignedOut>
       </div>
     </div>
   )
