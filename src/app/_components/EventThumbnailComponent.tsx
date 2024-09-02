@@ -2,10 +2,11 @@ import DateComponent from "./DateComponent"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {faEarthAmericas, faClock, faUser, faAnglesRight} from "@fortawesome/free-solid-svg-icons"
 import { EventType } from "~/server/db/schema"
+import Link from "next/link"
 
-function EventThumbnailComponent({checkin, eventData}: {checkin?: boolean, eventData: EventType}) {
+function EventThumbnailComponent({checkin, eventData, adminMode}: {checkin?: boolean, eventData: EventType, adminMode?: boolean}) {
   return (
-    <div className="flex flex-row w-full">
+    <Link href={adminMode ? `/admin/event/${eventData.id}` : `/event/${eventData.id}`} className="flex flex-row w-full">
         <DateComponent/>
 
         <div className="flex flex-col font-bold justify-between py-[4px] px-[12px] border-b-[1px] border-r-[1px] border-lightGray5 w-full relative">
@@ -41,7 +42,7 @@ function EventThumbnailComponent({checkin, eventData}: {checkin?: boolean, event
                 </div>
             }
         </div>
-    </div>
+    </Link>
   )
 }
 export default EventThumbnailComponent

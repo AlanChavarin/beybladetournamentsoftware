@@ -1,5 +1,5 @@
-import FontAwesomeIcon from "@fortawesome/react-fontawesome"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 
 function Navbar() {
@@ -8,11 +8,13 @@ function Navbar() {
       <img src="/svgs/redTriangle.svg" alt="" className="absolute top-0 right-0 rotate-180"/>
       <img src="/svgs/redTriangle.svg" alt="" className="absolute top-0 left-0 rotate-90"/>
       <div className="relative">
-        <div className="font-rubik text-[14px] leading-[17px] relative z-[2] p-[4px]">
-          BEYBLADE <br/>
-          TOURNAMENT <br/>
-          CENTER <br/>
-        </div>
+        <Link href="/">
+          <div className="font-rubik text-[14px] leading-[17px] relative z-[2] p-[4px]">
+            BEYBLADE <br/>
+            TOURNAMENT <br/>
+            CENTER <br/>
+          </div>
+        </Link>
         <img src="/svgs/BigRedThingy.svg" alt="" className="absolute top-0 z-[1] w-full h-full" />
       </div>
       <div className="absolute right-[0px] top-[50%] translate-y-[-50%] p-[12px]">

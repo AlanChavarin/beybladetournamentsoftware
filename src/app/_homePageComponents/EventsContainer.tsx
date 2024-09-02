@@ -3,11 +3,9 @@ import EventThumbnailComponent from "../_components/EventThumbnailComponent"
 import { api } from "~/trpc/server"
 
 
-async function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) {
+async function EventsContainer({mode, adminMode}: {mode: ('checkin' | 'pastTournaments'), adminMode?: boolean}) {
 
-    // get events from db, make the code work server side
     const events: EventType[] = await api.event.getAll()
-    //console.log(events)
 
   return (
     <div className="bg-darkGray box-shadow w-full max-w-[400px]">
@@ -26,13 +24,18 @@ async function EventsContainer({mode}: {mode: ('checkin' | 'pastTournaments')}) 
             </div>
 
             <div className="text-white font-rubik text-[16px] pt-[4px] place-self-start self-center">
-                {mode === 'checkin' && <>Check in Soon</>}
-                {mode === 'pastTournaments' && <>Past Tournaments</>}
+                {adminMode ? <>
+                    {mode === 'checkin' && <div className="text-[12px]">Manage Upcoming Events</div>}
+                    {mode === 'pastTournaments' && <div className="text-[12px]">Manage Past Tournaments</div>}
+                </> : <>
+                    {mode === 'checkin' && <>Check in Soon</>}
+                    {mode === 'pastTournaments' && <>Past Tournaments</>}
+                </>}
             </div>
         </div>
 
         <div className="h-full w-full bg-white flex flex-col">
-            { events.map(event => <EventThumbnailComponent eventData={event} checkin={mode === 'checkin'}/>)}
+            { events.map(event => <EventThumbnailComponent eventData={event} checkin={mode === 'checkin'} adminMode={adminMode}/>)}
 
         </div>
     </div>
