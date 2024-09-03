@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" DROP COLUMN IF EXISTS "players";

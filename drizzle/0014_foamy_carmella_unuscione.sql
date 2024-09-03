@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" ALTER COLUMN "players" SET DATA TYPE text;

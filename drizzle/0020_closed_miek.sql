@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "groups" integer DEFAULT 0;

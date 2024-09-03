@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "tags1" text[] DEFAULT '{}'::text[] NOT NULL;

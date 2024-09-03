@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { events } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql, desc, asc } from "drizzle-orm";
 
 export const eventRouter = createTRPCRouter({
   create: publicProcedure
@@ -30,8 +30,9 @@ export const eventRouter = createTRPCRouter({
 
   getAll: publicProcedure
     .query(async ({ ctx }) => {
-      // Get all events
-      return ctx.db.query.events.findMany();
+      return ctx.db.query.events.findMany({
+        orderBy: desc(events.date),
+      });
     }),
 
   update: publicProcedure
@@ -58,6 +59,50 @@ export const eventRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Delete event logic
       return ctx.db.delete(events)
+        .where(eq(events.id, input.id))
+        .returning();
+    }),
+  
+  addPlayer: publicProcedure
+    .input(z.object({ id: z.number(), player: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // throw an error if the event doesnt exist
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.id)
+      })
+      if (!event) {
+        throw new Error("Event not found");
+      }
+      if (event?.players.includes(input.player)) {
+        throw new Error("Player already in event");
+      }
+      return ctx.db.update(events)
+        .set({ 
+          players: sql`array_append(${events.players}, ${input.player})`
+        })
+        .where(eq(events.id, input.id))
+        .returning();
+    }),
+
+  removePlayer: publicProcedure
+    .input(z.object({ id: z.number(), player: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Remove player from event logic
+      return ctx.db.update(events)
+        .set({ 
+          players: sql`array_remove(${events.players}, ${input.player})`
+        })
+        .where(eq(events.id, input.id))
+        .returning();
+    }),
+
+  updateNumOfGroups: publicProcedure
+    .input(z.object({ id: z.number(), numOfGroups: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.update(events)
+        .set({ 
+          numOfGroups: input.numOfGroups
+        })
         .where(eq(events.id, input.id))
         .returning();
     }),

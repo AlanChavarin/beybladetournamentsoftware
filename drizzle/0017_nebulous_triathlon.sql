@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" RENAME COLUMN "tags1" TO "players";

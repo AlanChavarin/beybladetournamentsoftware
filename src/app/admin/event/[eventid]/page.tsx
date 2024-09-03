@@ -23,11 +23,12 @@ const Page = ({ params }: { params: { eventid: string } }) => {
   }
 
   const renderTabContent = () => {
+    if (!event) return <div>Loading...</div>
     switch (activeTab) {
         case 'Standings':
-            return <StandingsTab />
+            return <StandingsTab event={event}/>
         case 'Settings':
-            return <SettingsTab/>
+            return <SettingsTab event={event}/>
         case 'Group Stage':
             return <GroupStage/>
         case 'Final Stage':

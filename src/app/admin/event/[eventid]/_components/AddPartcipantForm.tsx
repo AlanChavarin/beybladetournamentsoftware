@@ -13,8 +13,9 @@ const formSchema = z.object({
 
 type FormSchemaType = z.infer<typeof formSchema>
 
-
-function AddPartcipantForm() {
+function AddPartcipantForm({eventid}: {eventid: number}) {
+    const addPlayer = api.event.addPlayer.useMutation()
+    const utils = api.useUtils()
 
     const form = useForm<FormSchemaType>({
         resolver: zodResolver(formSchema),
@@ -23,10 +24,21 @@ function AddPartcipantForm() {
         }
     })
 
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = form
+    const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = form
 
     const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
-        console.log(data)
+
+        try {
+            await addPlayer.mutateAsync({
+                id: eventid,
+                player: data.name
+            }) 
+            utils.event.getById.invalidate({id: eventid})
+            reset()
+        } catch (error) {
+            toast.error((error as Error).message)
+        }
+
     }
 
   return (
@@ -37,6 +49,7 @@ function AddPartcipantForm() {
             <button type="submit" disabled={isSubmitting} className="bg-green hover:bg-darkGreen text-white font-semibold h-[28px] w-[75px] rounded-[4px] text-[12px] box-shadow-small2">
                 {isSubmitting ? "Submitting..." : "Add"}
             </button>
+            <FormError errors={errors} />
         </div>
     </form>
   )

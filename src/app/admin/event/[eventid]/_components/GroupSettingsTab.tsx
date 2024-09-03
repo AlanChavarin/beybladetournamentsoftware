@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faSubtract, faUser } from "@fortawesome/free-solid-svg-icons"
+import { EventType } from "~/server/db/schema"
 
-
-function GroupSettingsTab() {
+function GroupSettingsTab({event}: {event: EventType}) {
   return (
     <div className="flex flex-col items-center gap-[14px] w-full">
         {/* Group Settings */}

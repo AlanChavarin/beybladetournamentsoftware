@@ -1,8 +1,9 @@
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import GroupComponent from "~/app/_components/GroupComponent"
+import { EventType } from "~/server/db/schema"
 
-function StandingsTab({dontShowCode}: {dontShowCode?: boolean}) {
+function StandingsTab({event, dontShowCode}: {dontShowCode?: boolean, event: EventType}) {
   return (
     <div className="flex flex-col items-center gap-[14px] p-[8px]">
       {
@@ -15,8 +16,8 @@ function StandingsTab({dontShowCode}: {dontShowCode?: boolean}) {
           </div>
       }
 
-        <GroupComponent header="Group A" />
-        <GroupComponent header="Group B" />
+        <GroupComponent header="Group A" players={event.players} />
+        <GroupComponent header="Group B" players={event.players} />
     </div>
 
   )
