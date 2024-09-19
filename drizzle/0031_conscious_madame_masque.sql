@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "event_player_unique_idx" ON "beybladetournamentsoftware_event_player" ("event_id","player_id");

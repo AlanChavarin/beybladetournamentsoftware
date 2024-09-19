@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_group" ADD COLUMN "num_of_players" integer DEFAULT 0;

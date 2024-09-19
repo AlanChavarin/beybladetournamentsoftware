@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import EventThumbnailComponent from "~/app/_components/EventThumbnailComponent"
-import { EventType } from "~/server/db/schema"
+import { EventType, GroupType, GroupWithPlayersType, PlayerType } from "~/server/db/schema"
 import { api } from "~/trpc/react"
 import { useRouter, useSearchParams } from 'next/navigation'
 import StandingsTab from './_components/StandingsTab'
@@ -13,6 +13,9 @@ import FinalStage from './_components/FinalStage'
 const Page = ({ params }: { params: { eventid: string } }) => {
   const { eventid } = params
   const [event, setEvent] = useState<EventType | undefined>(undefined)
+  const [players, setPlayers] = useState<PlayerType[] | undefined>(undefined)
+  const [groups, setGroups] = useState<GroupType[] | undefined>(undefined)
+  const [groupsWithPlayers, setGroupsWithPlayers] = useState<GroupWithPlayersType[] | undefined>(undefined)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -26,9 +29,9 @@ const Page = ({ params }: { params: { eventid: string } }) => {
     if (!event) return <div>Loading...</div>
     switch (activeTab) {
         case 'Standings':
-            return <StandingsTab event={event}/>
+            return <StandingsTab groupsWithPlayers={groupsWithPlayers || []}/>
         case 'Settings':
-            return <SettingsTab event={event}/>
+            return <SettingsTab groups={groups || []} event={event} players={players || []}/>
         case 'Group Stage':
             return <GroupStage/>
         case 'Final Stage':
@@ -39,12 +42,19 @@ const Page = ({ params }: { params: { eventid: string } }) => {
   }
 
   const { data: fetchedEvent, isLoading } = api.event.getById.useQuery({ id: parseInt(eventid) })
+  const { data: fetchedPlayers, isLoading: isLoadingPlayers } = api.player.getPlayersByEventId.useQuery({ eventId: parseInt(eventid) })
+  const { data: fetchedGroups, isLoading: isLoadingGroups } = api.group.getGroupsByEventId.useQuery({ eventId: parseInt(eventid)})
+
+  const { data: fetchedGroupsWithPlayers, isLoading: isLoadingGroupsWithPlayers } = api.group.getGroupsWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
 
   useEffect(() => {
     if (fetchedEvent) {
       setEvent(fetchedEvent)
     }
-  }, [fetchedEvent])
+    setPlayers(fetchedPlayers)
+    setGroups(fetchedGroups)
+    setGroupsWithPlayers(fetchedGroupsWithPlayers)
+  }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers])
 
   return (
     <div className="flex flex-col items-center gap-[8px]">

@@ -14,7 +14,7 @@ const formSchema = z.object({
 type FormSchemaType = z.infer<typeof formSchema>
 
 function AddPartcipantForm({eventid}: {eventid: number}) {
-    const addPlayer = api.event.addPlayer.useMutation()
+    const addPlayer = api.player.addPlayerToEventViaUsername.useMutation()
     const utils = api.useUtils()
 
     const form = useForm<FormSchemaType>({
@@ -30,10 +30,13 @@ function AddPartcipantForm({eventid}: {eventid: number}) {
 
         try {
             await addPlayer.mutateAsync({
-                id: eventid,
-                player: data.name
-            }) 
+                eventId: eventid,
+                playerName: data.name
+            })
+            //invalidate the correct cache
             utils.event.getById.invalidate({id: eventid})
+            utils.player.getPlayersByEventId.invalidate({eventId: eventid})
+            utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: eventid})
             reset()
         } catch (error) {
             toast.error((error as Error).message)

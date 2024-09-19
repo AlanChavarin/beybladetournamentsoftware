@@ -3,7 +3,7 @@ function TabButton({text, onClick, activeTab, color}: {text: string, onClick: ()
     <button 
     className={`
         ${color==='green' && (activeTab===text ? 'bg-darkGreen hover:bg-darkGreenHover' : 'bg-green hover:bg-greenHover')} 
-        ${color==='gray' && (activeTab===text ? 'bg-lightGray1' : 'bg-lightGray2')} 
+        ${color==='gray' && (activeTab===text ? 'bg-lightGray7' : 'bg-lightGray2')} 
         
         ${color === 'green' && `text-white`} 
         ${color === 'gray' && `text-black`} 

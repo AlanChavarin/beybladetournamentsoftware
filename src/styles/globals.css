@@ -17,6 +17,10 @@
     box-shadow: 2px 2px 1px rgb(0, 0, 0);
 }
 
+.box-shadow-small3{
+    box-shadow: 1px 1px 1px rgb(0, 0, 0);
+}
+
 
 .text-shadow{
     text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.25);

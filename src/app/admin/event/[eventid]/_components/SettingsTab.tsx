@@ -3,28 +3,29 @@ import TabButton from "~/app/_components/TabButton"
 import GroupComponent from "~/app/_components/GroupComponent"
 import AddPartcipantForm from "./AddPartcipantForm"
 import GroupSettingsTab from "./GroupSettingsTab"
-import { EventType } from "~/server/db/schema"
+import { EventType, GroupType, PlayerType } from "~/server/db/schema"
 
-function AddParticipantsTab({event}: {event: EventType}) {
+
+function AddParticipantsTab({event, players}: {event: EventType, players: PlayerType[]}) {
     return (
         <>  
-            <GroupComponent header="Participants" players={event.players} />
+            <GroupComponent header="Participants" showDeleteButton={true} players={players} event={event}/>
             <AddPartcipantForm eventid={event.id}/>
         </>
     ) 
 }
 
 
-function SettingsTab({event}: {event: EventType}) {
+function SettingsTab({groups, event, players}: {groups: GroupType[], event: EventType, players: PlayerType[]}) {
 
     const [tab, setTab] = useState<'Add Participants' | 'Group Settings'>('Add Participants')
 
     const renderTabContent = () => {
         switch (tab) {
             case 'Add Participants':
-                return <AddParticipantsTab event={event} />
+                return <AddParticipantsTab event={event} players={players} />
             case 'Group Settings':
-                return <GroupSettingsTab event={event} />
+                return <GroupSettingsTab groups={groups} event={event} />
         }
     }
 

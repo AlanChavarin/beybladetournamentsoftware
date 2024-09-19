@@ -1,0 +1,2 @@
+ALTER TABLE "beybladetournamentsoftware_event_player" ALTER COLUMN "event_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "beybladetournamentsoftware_event_player" ALTER COLUMN "player_id" SET NOT NULL;

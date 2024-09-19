@@ -1,0 +1,449 @@
+{
+  "id": "86b7cce6-80af-4f46-ac81-bf94f0aa0d02",
+  "prevId": "c077cf5d-90c3-4c10-8f53-9df489f242aa",
+  "version": "6",
+  "dialect": "postgresql",
+  "tables": {
+    "public.beybladetournamentsoftware_event_player": {
+      "name": "beybladetournamentsoftware_event_player",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "beybladetournamentsoftware_event_player_event_id_beybladetournamentsoftware_event_id_fk": {
+          "name": "beybladetournamentsoftware_event_player_event_id_beybladetournamentsoftware_event_id_fk",
+          "tableFrom": "beybladetournamentsoftware_event_player",
+          "tableTo": "beybladetournamentsoftware_event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_event_player_player_id_beybladetournamentsoftware_player_id_fk": {
+          "name": "beybladetournamentsoftware_event_player_player_id_beybladetournamentsoftware_player_id_fk",
+          "tableFrom": "beybladetournamentsoftware_event_player",
+          "tableTo": "beybladetournamentsoftware_player",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.beybladetournamentsoftware_event": {
+      "name": "beybladetournamentsoftware_event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "format": {
+          "name": "format",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time": {
+          "name": "time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_in_time": {
+          "name": "check_in_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deck_list_requirement": {
+          "name": "deck_list_requirement",
+          "type": "deck_list_requirement",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_groups": {
+          "name": "num_of_groups",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "how_many_from_each_group_advance": {
+          "name": "how_many_from_each_group_advance",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 2
+        }
+      },
+      "indexes": {
+        "name_idx": {
+          "name": "name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.beybladetournamentsoftware_group_player": {
+      "name": "beybladetournamentsoftware_group_player",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "beybladetournamentsoftware_group_player_group_id_beybladetournamentsoftware_group_id_fk": {
+          "name": "beybladetournamentsoftware_group_player_group_id_beybladetournamentsoftware_group_id_fk",
+          "tableFrom": "beybladetournamentsoftware_group_player",
+          "tableTo": "beybladetournamentsoftware_group",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_group_player_player_id_beybladetournamentsoftware_player_id_fk": {
+          "name": "beybladetournamentsoftware_group_player_player_id_beybladetournamentsoftware_player_id_fk",
+          "tableFrom": "beybladetournamentsoftware_group_player",
+          "tableTo": "beybladetournamentsoftware_player",
+          "columnsFrom": [
+            "player_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_group_player_event_id_beybladetournamentsoftware_event_id_fk": {
+          "name": "beybladetournamentsoftware_group_player_event_id_beybladetournamentsoftware_event_id_fk",
+          "tableFrom": "beybladetournamentsoftware_group_player",
+          "tableTo": "beybladetournamentsoftware_event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.beybladetournamentsoftware_group": {
+      "name": "beybladetournamentsoftware_group",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "group_letter": {
+          "name": "group_letter",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_of_players": {
+          "name": "num_of_players",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "beybladetournamentsoftware_group_event_id_beybladetournamentsoftware_event_id_fk": {
+          "name": "beybladetournamentsoftware_group_event_id_beybladetournamentsoftware_event_id_fk",
+          "tableFrom": "beybladetournamentsoftware_group",
+          "tableTo": "beybladetournamentsoftware_event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.beybladetournamentsoftware_match": {
+      "name": "beybladetournamentsoftware_match",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player1_id": {
+          "name": "player1_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player2_id": {
+          "name": "player2_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "player1_score": {
+          "name": "player1_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "player2_score": {
+          "name": "player2_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "winner": {
+          "name": "winner",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "round": {
+          "name": "round",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "table": {
+          "name": "table",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "beybladetournamentsoftware_match_event_id_beybladetournamentsoftware_event_id_fk": {
+          "name": "beybladetournamentsoftware_match_event_id_beybladetournamentsoftware_event_id_fk",
+          "tableFrom": "beybladetournamentsoftware_match",
+          "tableTo": "beybladetournamentsoftware_event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_match_player1_id_beybladetournamentsoftware_player_id_fk": {
+          "name": "beybladetournamentsoftware_match_player1_id_beybladetournamentsoftware_player_id_fk",
+          "tableFrom": "beybladetournamentsoftware_match",
+          "tableTo": "beybladetournamentsoftware_player",
+          "columnsFrom": [
+            "player1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_match_player2_id_beybladetournamentsoftware_player_id_fk": {
+          "name": "beybladetournamentsoftware_match_player2_id_beybladetournamentsoftware_player_id_fk",
+          "tableFrom": "beybladetournamentsoftware_match",
+          "tableTo": "beybladetournamentsoftware_player",
+          "columnsFrom": [
+            "player2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "beybladetournamentsoftware_match_winner_beybladetournamentsoftware_player_id_fk": {
+          "name": "beybladetournamentsoftware_match_winner_beybladetournamentsoftware_player_id_fk",
+          "tableFrom": "beybladetournamentsoftware_match",
+          "tableTo": "beybladetournamentsoftware_player",
+          "columnsFrom": [
+            "winner"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.beybladetournamentsoftware_player": {
+      "name": "beybladetournamentsoftware_player",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_wins": {
+          "name": "number_of_wins",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "total_weight_of_wins_based_on_opponent_wins": {
+          "name": "total_weight_of_wins_based_on_opponent_wins",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "total_weight_of_wins_based_on_score": {
+          "name": "total_weight_of_wins_based_on_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

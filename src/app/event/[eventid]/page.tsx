@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import EventThumbnailComponent from "~/app/_components/EventThumbnailComponent"
-import { EventType } from "~/server/db/schema"
+import { EventType, GroupWithPlayersType, PlayerType } from "~/server/db/schema"
 import { api } from "~/trpc/react"
 import { useRouter, useSearchParams } from 'next/navigation'
 import TabButton from '~/app/_components/TabButton'
@@ -11,6 +11,8 @@ import StandingsTab from '~/app/admin/event/[eventid]/_components/StandingsTab'
 function Page({ params }: { params: { eventid: string } }) {
     const { eventid } = params
     const [event, setEvent] = useState<EventType | undefined>(undefined)
+    const [players, setPlayers] = useState<PlayerType[] | undefined>(undefined)
+    const [groupsWithPlayers, setGroupsWithPlayers] = useState<GroupWithPlayersType[] | undefined>(undefined)
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -21,11 +23,12 @@ function Page({ params }: { params: { eventid: string } }) {
     }
 
     const renderTabContent = () => {
+      if (!players) return <></>
       switch (activeTab) {
           case 'Your Pairings':
               return <YourPairings />
           case 'Standings':
-              return <StandingsTab dontShowCode={true}/>
+              return <StandingsTab groupsWithPlayers={groupsWithPlayers || []}/>
           case 'Deck List':
               return <>Deck List</>
           default:
@@ -34,12 +37,16 @@ function Page({ params }: { params: { eventid: string } }) {
     }
 
     const { data: fetchedEvent, isLoading } = api.event.getById.useQuery({ id: parseInt(eventid) })
+    const { data: fetchedPlayers, isLoading: isLoadingPlayers } = api.player.getPlayersByEventId.useQuery({ eventId: parseInt(eventid) })
+    const { data: fetchedGroupsWithPlayers, isLoading: isLoadingGroupsWithPlayers } = api.group.getGroupsWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
 
     useEffect(() => {
         if (fetchedEvent) {
           setEvent(fetchedEvent)
+          setPlayers(fetchedPlayers)
+          setGroupsWithPlayers(fetchedGroupsWithPlayers)
         }
-    }, [fetchedEvent])
+    }, [fetchedEvent, fetchedPlayers])
 
   return (
     <div className="flex flex-col items-center gap-[8px]">
