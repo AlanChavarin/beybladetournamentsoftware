@@ -18,6 +18,7 @@ type FormSchemaType = z.infer<typeof formSchema>
 
 function GroupSettingsTab({groups, event}: {groups: GroupType[], event: EventType}) {
     const updateEvent = api.event.updateGroupSettings.useMutation()
+    const createMatches = api.match.createMatchesBasedOnEvent.useMutation()
     const utils = api.useUtils()
 
     const form = useForm<FormSchemaType>({
@@ -40,6 +41,7 @@ function GroupSettingsTab({groups, event}: {groups: GroupType[], event: EventTyp
             utils.event.getById.invalidate({id: event.id})
             utils.group.getGroupsByEventId.invalidate({eventId: event.id})
             utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: event.id})
+            await createMatches.mutateAsync({eventId: event.id})
         } catch (error) {
             toast.error((error as Error).message)
         }

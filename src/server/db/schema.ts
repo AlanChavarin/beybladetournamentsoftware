@@ -123,13 +123,16 @@ export const matches = createTable(
   {
     id: serial("id").primaryKey(),
     eventId: integer("event_id").references(() => events.id),
+    groupId: integer("group_id").references(() => groups.id),
     player1: integer("player1_id").references(() => players.id),
     player2: integer("player2_id").references(() => players.id),
     player1Score: integer("player1_score").default(0),
     player2Score: integer("player2_score").default(0),
-    winner: integer("winner").references(() => players.id),
+    // make this null by default
+    // winner: integer("winner").references(() => players.id).default(sql`NULL`),
     round: integer("round"),
     table: integer("table"),
+
   }
 )
 
@@ -139,6 +142,10 @@ export const matchesRelations = relations(matches, ({ one }) => ({
   eventId: one(events, {
     fields: [matches.eventId],
     references: [events.id],
+  }),
+  groupId: one(groups, {
+    fields: [matches.groupId],
+    references: [groups.id],
   }),
   player1: one(players, {
     fields: [matches.player1],

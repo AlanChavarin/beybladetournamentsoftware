@@ -1,23 +1,23 @@
-type Player = string;
-type Match = [Player, Player];
+
+type Match = [PlayerType, PlayerType];
 type Round = Match[];
 type Tournament = Round[];
-import { MatchType } from "./db/schema";
+import { MatchType, PlayerType } from "./db/schema";
 
-export default function createRoundRobin(players: Player[], eventId: number): MatchType[]{
+export default function createRoundRobin(players: PlayerType[], eventId: number, groupId: number): MatchType[]{
     const n: number = players.length;
     const rounds: Tournament = [];
-    const playersCopy: (Player | "BYE")[] = [...players];
+    const playersCopy: (PlayerType | null)[] = [...players];
     let matchesToCreate: MatchType[] = [];
 
     if (n % 2 !== 0) {
-        playersCopy.push("BYE");
+        playersCopy.push(null);
     }
 
     for (let round = 0; round < playersCopy.length - 1; round++) {
         const roundPairings: Round = [];
         for (let i = 0; i < playersCopy.length / 2; i++) {
-            if (playersCopy[i] !== "BYE" && playersCopy[playersCopy.length - 1 - i] !== "BYE") {
+            if (playersCopy[i] !== null && playersCopy[playersCopy.length - 1 - i] !== null) {
                 roundPairings.push([playersCopy[i], playersCopy[playersCopy.length - 1 - i]] as Match);
             }
         }
@@ -27,19 +27,23 @@ export default function createRoundRobin(players: Player[], eventId: number): Ma
         playersCopy.splice(1, 0, playersCopy.pop()!);
     }
 
+
     for(let i = 0; i < rounds.length; i++){
-        // @ts-ignore
-        for(let j = 0; j < rounds[i].length; j++){
-            // @ts-ignore
-            matchesToCreate.push({
-                eventId,
-                // @ts-ignore
-                player1: rounds[i][j][0],
-                // @ts-ignore
-                player2: rounds[i][j][1],
-                round: i+1,
-                table: j+1,
-            });
+        const round = rounds[i];
+        if(round){
+            for(let j = 0; j < round.length; j++){
+                const innerRound = round[j]
+                if(innerRound){
+                    matchesToCreate.push({
+                        eventId,
+                        player1: innerRound[0].id,
+                        player2: innerRound[1].id,
+                        round: i+1,
+                        table: j+1,
+                        groupId,
+                    } as MatchType);
+                }
+            }
         }
     }
 

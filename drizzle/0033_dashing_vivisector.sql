@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_match" ALTER COLUMN "winner" SET DEFAULT NULL;
