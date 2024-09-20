@@ -1,8 +1,7 @@
-
+import { MatchType, PlayerType } from "./db/schema";
 type Match = [PlayerType, PlayerType];
 type Round = Match[];
 type Tournament = Round[];
-import { MatchType, PlayerType } from "./db/schema";
 
 export default function createRoundRobin(players: PlayerType[], eventId: number, groupId: number): MatchType[]{
     const n: number = players.length;
@@ -27,25 +26,32 @@ export default function createRoundRobin(players: PlayerType[], eventId: number,
         playersCopy.splice(1, 0, playersCopy.pop()!);
     }
 
+    //console.log("rounds: ", rounds[0][0][0].playerId);
+    //onsole.log("rounds: ", rounds[0][0]);
 
-    for(let i = 0; i < rounds.length; i++){
+
+    for (let i = 0; i < rounds.length; i++) {
         const round = rounds[i];
         if(round){
-            for(let j = 0; j < round.length; j++){
-                const innerRound = round[j]
-                if(innerRound){
-                    matchesToCreate.push({
-                        eventId,
-                        player1: innerRound[0].id,
-                        player2: innerRound[1].id,
-                        round: i+1,
-                        table: j+1,
-                        groupId,
-                    } as MatchType);
+        for (let j = 0; j < round.length; j++) {
+            const innerRound: Match | undefined = round[j];
+            if (innerRound && innerRound[0] && innerRound[1]) {
+                matchesToCreate.push({
+                    eventId,
+                    // @ts-ignore how the hell do i fix this
+                    player1: innerRound[0].playerId,
+                    // @ts-ignore how the hell do i fix this
+                    player2: innerRound[1].playerId,
+                    round: i + 1,
+                    table: j + 1,
+                    groupId,
+                } as MatchType);
                 }
             }
         }
     }
+
+    //console.log("matchesToCreate: ", matchesToCreate);
 
     return matchesToCreate;
     

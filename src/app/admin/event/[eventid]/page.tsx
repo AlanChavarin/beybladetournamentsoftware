@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import EventThumbnailComponent from "~/app/_components/EventThumbnailComponent"
-import { EventType, GroupType, GroupWithPlayersType, PlayerType } from "~/server/db/schema"
+import { EventType, GroupType, formattedGroupWithMatchesWithPlayersType, GroupWithMatchesWithPlayersType, GroupWithPlayersType, MatchType, PlayerType } from "~/server/db/schema"
 import { api } from "~/trpc/react"
 import { useRouter, useSearchParams } from 'next/navigation'
 import StandingsTab from './_components/StandingsTab'
@@ -16,6 +16,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
   const [players, setPlayers] = useState<PlayerType[] | undefined>(undefined)
   const [groups, setGroups] = useState<GroupType[] | undefined>(undefined)
   const [groupsWithPlayers, setGroupsWithPlayers] = useState<GroupWithPlayersType[] | undefined>(undefined)
+  const [formattedGroupsWithMatchesWithPlayers, setFormattedGroupsWithMatchesWithPlayers] = useState<formattedGroupWithMatchesWithPlayersType[] | undefined>(undefined)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -33,7 +34,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
         case 'Settings':
             return <SettingsTab groups={groups || []} event={event} players={players || []}/>
         case 'Group Stage':
-            return <GroupStage/>
+            return <GroupStage formattedGroupsWithMatchesWithPlayers={formattedGroupsWithMatchesWithPlayers || []}/>
         case 'Final Stage':
             return <FinalStage/>
         default:
@@ -47,6 +48,8 @@ const Page = ({ params }: { params: { eventid: string } }) => {
 
   const { data: fetchedGroupsWithPlayers, isLoading: isLoadingGroupsWithPlayers } = api.group.getGroupsWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
 
+  const { data: fetchedGroupsWithMatchesWithPlayers, isLoading: isLoadingGroupsWithMatchesWithPlayers } = api.group.getGroupsWithMatchesWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
+
   useEffect(() => {
     if (fetchedEvent) {
       setEvent(fetchedEvent)
@@ -54,7 +57,9 @@ const Page = ({ params }: { params: { eventid: string } }) => {
     setPlayers(fetchedPlayers)
     setGroups(fetchedGroups)
     setGroupsWithPlayers(fetchedGroupsWithPlayers)
-  }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers])
+    setFormattedGroupsWithMatchesWithPlayers(fetchedGroupsWithMatchesWithPlayers)
+    //setGroupsWithMatches(fetchedGroupsWithMatches)
+  }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers, fetchedGroupsWithMatchesWithPlayers])
 
   return (
     <div className="flex flex-col items-center gap-[8px]">

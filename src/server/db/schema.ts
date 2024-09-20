@@ -168,6 +168,10 @@ export const groups = createTable(
   }
 )
 
+export const groupRelations = relations(groups, ({ many }) => ({
+  matches: many(matches),
+}));
+
 export const groupPlayers = createTable(
   "group_player",
   {
@@ -202,6 +206,19 @@ export const groupsRelations = relations(groups, ({ many }) => ({
 
 export type GroupWithPlayersType = GroupType & {
   players: PlayerType[];
+};
+
+export type MatchWithPlayersType = MatchType & {
+  player1: PlayerType;
+  player2: PlayerType;
+};
+
+export type GroupWithMatchesWithPlayersType = GroupType & {
+  matches?: MatchWithPlayersType[];
+};
+
+export type formattedGroupWithMatchesWithPlayersType = GroupType & {
+  matches?: MatchWithPlayersType[][];
 };
 
 export type GroupType = InferSelectModel<typeof groups>

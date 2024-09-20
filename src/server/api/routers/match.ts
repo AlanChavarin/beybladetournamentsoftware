@@ -6,11 +6,22 @@ import createRoundRobin from "~/server/createRoundRobin";
 
 export const matchRouter = createTRPCRouter({
 
+    getMatchesByEventId: publicProcedure
+    .input(z.object({
+        eventId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+        return ctx.db.query.matches.findMany({
+            where: eq(matches.eventId, input.eventId),
+        });
+    }),
+
     createMatchesBasedOnEvent: publicProcedure
     .input(z.object({
         eventId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
+
         const groupsWithPlayersRawData = await ctx.db
         .select({
           group: groups,
@@ -41,9 +52,11 @@ export const matchRouter = createTRPCRouter({
                 return matchesToCreate;
             }
         })
-
+        
         const flattedMatchesToCreate: MatchType[] = matchesToCreate.flatMap(match => match).filter(match => match !== undefined) as MatchType[];
 
+        //console.log("matchesToCreate: ", flattedMatchesToCreate);
+        
         const result = await ctx.db.insert(matches).values(flattedMatchesToCreate).returning();
 
         //console.log("result: ", flattedMatchesToCreate);
@@ -52,31 +65,16 @@ export const matchRouter = createTRPCRouter({
 
     }),
 
-    // createMatchesBasedOnEvent: publicProcedure
-    // .input(z.object({
-    //     eventId: z.number(),
-    // }))
-    // .mutation(async ({ ctx, input }) => {
+    setMatchResult: publicProcedure
+    .input(z.object({
+        matchId: z.number(),
+        player1Score: z.number(),
+        player2Score: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+        return ctx.db.update(matches).set({ player1Score: input.player1Score, player2Score: input.player2Score }).where(eq(matches.id, input.matchId));
+    }),
 
-    //     let matchesToCreate: MatchType[]
-
-    //     const event = await ctx.db.query.events.findFirst({
-    //         where: eq(events.id, input.eventId),
-    //     })
-
-    //     if (!event) {
-    //         throw new Error("Event not found");
-    //     }
-
-    //     if(event.players){
-    //         const playersArray = event.players.split(",");
-    //         matchesToCreate = createRoundRobin(playersArray, event.id);
-
-    //         return ctx.db.insert(matches).values(matchesToCreate).returning();
-    //     } else {
-    //         throw new Error("No players found");
-    //     }
-    // }),
 
     // create: publicProcedure
     // .input(z.object({

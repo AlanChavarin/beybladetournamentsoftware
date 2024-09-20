@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { events, groups, eventPlayers, groupPlayers } from "~/server/db/schema";
+import { events, groups, eventPlayers, groupPlayers, matches } from "~/server/db/schema";
 import { eq, sql, desc, asc } from "drizzle-orm";
 
 export const eventRouter = createTRPCRouter({
@@ -122,7 +122,9 @@ export const eventRouter = createTRPCRouter({
         throw new Error("Event not found");
       }
       
-      
+      //delete matches for this event
+      await ctx.db.delete(matches).where(eq(matches.eventId, input.id));
+
       // Delete existing group assignments
       await ctx.db.delete(groupPlayers)
         .where(eq(groupPlayers.eventId, input.id));
@@ -196,6 +198,6 @@ export const eventRouter = createTRPCRouter({
           .set({ numOfPlayers: group.numOfPlayers })
           .where(eq(groups.id, group.id));
       }
-      
+
     }),
 });

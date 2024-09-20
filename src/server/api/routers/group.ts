@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { events, groups, eventPlayers, groupPlayers, players, GroupWithPlayersType } from "~/server/db/schema";
-import { eq, sql, desc, asc } from "drizzle-orm";
+import { events, groups, eventPlayers, groupPlayers, players, GroupWithPlayersType, matches, GroupWithMatchesWithPlayersType, formattedGroupWithMatchesWithPlayersType } from "~/server/db/schema";
+import { eq, sql, desc, asc, aliasedTable } from "drizzle-orm";
 
 
 export const groupRouter = createTRPCRouter({
@@ -39,5 +39,37 @@ export const groupRouter = createTRPCRouter({
           }, [] as Array<GroupWithPlayersType>);
 
         return result;
+    }),
+
+    getGroupsWithMatchesWithPlayersByEventId: publicProcedure
+        .input(z.object({ eventId: z.number() }))
+        .query(async ({ ctx, input }) => {
+            const groupsWithMatchesWithPlayers: GroupWithMatchesWithPlayersType[] = await ctx.db.query.groups.findMany({
+                where: eq(groups.eventId, input.eventId),
+                with: {
+                    matches: {
+                        with: {
+                            player1: true,
+                            player2: true,
+                        },
+                    },
+                },
+            })
+
+            // i want to reformat matches of the same round are put into their own array
+            const reformattedGroupsWithMatchesWithPlayers: formattedGroupWithMatchesWithPlayersType[] = groupsWithMatchesWithPlayers.map(group => {
+                if(!group.matches) return { ...group, matches: [] }
+                const matches = group.matches
+                const rounds = [...new Set(matches.map(match => match.round))]
+                const matchesByRound = rounds.map(round => matches.filter(match => match.round === round))
+                return {
+                    ...group,
+                    matches: matchesByRound
+                }
+            })
+
+        
+
+        return reformattedGroupsWithMatchesWithPlayers
     }),
 });

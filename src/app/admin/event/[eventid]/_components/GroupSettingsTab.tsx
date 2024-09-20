@@ -41,6 +41,7 @@ function GroupSettingsTab({groups, event}: {groups: GroupType[], event: EventTyp
             utils.event.getById.invalidate({id: event.id})
             utils.group.getGroupsByEventId.invalidate({eventId: event.id})
             utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: event.id})
+            utils.group.getGroupsWithMatchesWithPlayersByEventId.invalidate({eventId: event.id})
             await createMatches.mutateAsync({eventId: event.id})
         } catch (error) {
             toast.error((error as Error).message)
