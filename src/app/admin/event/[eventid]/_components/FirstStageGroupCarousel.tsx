@@ -3,9 +3,11 @@ import React, { useCallback, useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { formattedGroupWithMatchesWithPlayersType, GroupType, GroupWithMatchesWithPlayersType, MatchWithPlayersType } from '~/server/db/schema'
 
-function GroupCarouselItem({match}: {match: MatchWithPlayersType}) {
+function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, handleClick: (match: MatchWithPlayersType) => void}) {
+
+
     return (
-        <div className='bg-darkGray w-full h-[32px] flex items-center box-shadow-small2'>
+        <button className='bg-darkGray w-full h-[32px] flex items-center box-shadow-small2' onClick={() => handleClick(match)}>
             <div className='basis-[36px] h-full bg-white text-black flex items-center justify-center font-rubik text-[14px]'>
                 {match?.table}
             </div>
@@ -21,7 +23,7 @@ function GroupCarouselItem({match}: {match: MatchWithPlayersType}) {
             <div className='basis-[120px] h-full bg-darkGray text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center'>
                 {match?.player1?.name}
             </div>
-        </div>
+        </button>
     )
 }
 
@@ -43,13 +45,20 @@ function FirstStageGroupCarousel({formattedGroupWithMatchesWithPlayers}: {format
             setCurrentIndex(emblaApi.selectedScrollSnap())
         }
     }, [emblaApi])
-
+    
     useEffect(() => {
         if (emblaApi) {
             emblaApi.on('select', onSelect)
             onSelect() // Set initial index
         }
     }, [emblaApi, onSelect])
+    
+    const [openMatch, setOpenMatch] = useState<MatchWithPlayersType | undefined>(undefined)
+
+
+    const handleClick = (match: MatchWithPlayersType) => { 
+        setOpenMatch(match)
+    }
 
 
   return (
@@ -69,38 +78,30 @@ function FirstStageGroupCarousel({formattedGroupWithMatchesWithPlayers}: {format
                         {formattedGroupWithMatchesWithPlayers.matches && formattedGroupWithMatchesWithPlayers.matches.map((round, index) => (
                             <div className="embla__slide flex flex-col gap-[8px]" key={index}>
                                 {round.map((match, matchIndex) => (
-                                    <GroupCarouselItem key={matchIndex} match={match} />
+                                    <GroupCarouselItem handleClick={handleClick} key={matchIndex} match={match} />
                                 ))}
                             </div>
                         ))}
-                        {/* <div className="embla__slide flex flex-col gap-[8px]">
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                        </div>
-                        <div className="embla__slide flex flex-col gap-[8px]">
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                        </div>
-                        <div className="embla__slide flex flex-col gap-[8px]">
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                        </div>
-                        <div className="embla__slide flex flex-col gap-[8px]">
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                            <GroupCarouselItem />
-                        </div> */}
                     </div>
                 </div>
             </div>
         </div>
+        {openMatch && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+                <div className="bg-lightGray3 text-white p-[16px] box-shadow-small2 max-w-[90%] w-[300px]">
+                    <h3 className="font-rubik text-[16px] mb-[8px]">Match Details</h3>
+                    <p className="text-[12px] mb-[4px]">Player 1: {openMatch?.player1?.name}</p>
+                    <p className="text-[12px] mb-[4px]">Player 2: {openMatch?.player2?.name}</p>
+                    <p className="text-[12px] mb-[12px]">Table: {openMatch?.table}</p>
+                    <button 
+                        onClick={() => setOpenMatch(undefined)}
+                        className="bg-darkGray text-white px-[16px] py-[8px] box-shadow-small3 hover:bg-opacity-90 transition-colors font-rubik text-[12px]"
+                    >
+                        Close
+                    </button>   
+                </div>
+            </div>
+        )}
 
     </div>
   )

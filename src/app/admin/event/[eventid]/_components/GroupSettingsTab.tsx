@@ -38,11 +38,11 @@ function GroupSettingsTab({groups, event}: {groups: GroupType[], event: EventTyp
                 numOfGroups: data.numOfGroups,
                 howManyFromEachGroupAdvance: data.advanceFromEachGroup,
             })
-            utils.event.getById.invalidate({id: event.id})
-            utils.group.getGroupsByEventId.invalidate({eventId: event.id})
-            utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: event.id})
-            utils.group.getGroupsWithMatchesWithPlayersByEventId.invalidate({eventId: event.id})
+            await utils.event.getById.invalidate({id: event.id})
+            await utils.group.getGroupsByEventId.invalidate({eventId: event.id})
+            await utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: event.id})
             await createMatches.mutateAsync({eventId: event.id})
+            await utils.group.getGroupsWithMatchesWithPlayersByEventId.invalidate({eventId: event.id})
         } catch (error) {
             toast.error((error as Error).message)
         }
