@@ -59,7 +59,7 @@ export const groupRouter = createTRPCRouter({
             // i want to reformat matches of the same round are put into their own array
             const reformattedGroupsWithMatchesWithPlayers: formattedGroupWithMatchesWithPlayersType[] = groupsWithMatchesWithPlayers.map(group => {
                 if(!group.matches) return { ...group, matches: [] }
-                const matches = group.matches
+                const matches = group.matches.sort((a, b) => a.id - b.id)
                 const rounds = [...new Set(matches.map(match => match.round))]
                 const matchesByRound = rounds.map(round => matches.filter(match => match.round === round))
                 return {

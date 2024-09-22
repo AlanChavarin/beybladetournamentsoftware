@@ -2,26 +2,33 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { formattedGroupWithMatchesWithPlayersType, GroupType, GroupWithMatchesWithPlayersType, MatchWithPlayersType } from '~/server/db/schema'
+import MatchScoreForm from './MatchScoreForm'
 
 function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, handleClick: (match: MatchWithPlayersType) => void}) {
 
 
     return (
-        <button className='bg-darkGray w-full h-[32px] flex items-center box-shadow-small2' onClick={() => handleClick(match)}>
+        <button className='bg-darkGray w-full h-[32px] flex items-center justify-start box-shadow-small2' onClick={() => handleClick(match)}>
             <div className='basis-[36px] h-full bg-white text-black flex items-center justify-center font-rubik text-[14px]'>
                 {match?.table}
             </div>
             <div className='basis-[120px] h-full bg-darkGray text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center'>
-                {match?.player2?.name}
+                {match?.player1?.name}
             </div>
             <div className='basis-[32px] h-full bg-darkGray text-black flex items-center justify-center font-rubik text-[10px] relative'>
-                <div className='text-white absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-[1]'>
-                    VS
-                </div>
-                <img src="/svgs/RedThingy.svg" alt="redThingy" className='size-full' />
+                {match?.player2Score || match?.player1Score ?
+                    <div className='text-white text-nowrap text-[14px] z-[1]'>{match?.player1Score ?? 0}-{match?.player2Score ?? 0}</div>
+                    :
+                    <>
+                        <div className='text-white absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-[1]'>
+                            VS
+                        </div>
+                    </>
+                }
+                <img src="/svgs/RedThingy.svg" alt="redThingy" className='size-full absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-[0]' />
             </div>
             <div className='basis-[120px] h-full bg-darkGray text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center'>
-                {match?.player1?.name}
+                {match?.player2?.name}
             </div>
         </button>
     )
@@ -86,22 +93,7 @@ function FirstStageGroupCarousel({formattedGroupWithMatchesWithPlayers}: {format
                 </div>
             </div>
         </div>
-        {openMatch && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-                <div className="bg-lightGray3 text-white p-[16px] box-shadow-small2 max-w-[90%] w-[300px]">
-                    <h3 className="font-rubik text-[16px] mb-[8px]">Match Details</h3>
-                    <p className="text-[12px] mb-[4px]">Player 1: {openMatch?.player1?.name}</p>
-                    <p className="text-[12px] mb-[4px]">Player 2: {openMatch?.player2?.name}</p>
-                    <p className="text-[12px] mb-[12px]">Table: {openMatch?.table}</p>
-                    <button 
-                        onClick={() => setOpenMatch(undefined)}
-                        className="bg-darkGray text-white px-[16px] py-[8px] box-shadow-small3 hover:bg-opacity-90 transition-colors font-rubik text-[12px]"
-                    >
-                        Close
-                    </button>   
-                </div>
-            </div>
-        )}
+        {openMatch && <MatchScoreForm openMatch={openMatch} setOpenMatch={setOpenMatch} />}
 
     </div>
   )
