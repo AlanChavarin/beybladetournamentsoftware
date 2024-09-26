@@ -4,6 +4,18 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { formattedGroupWithMatchesWithPlayersType, GroupType, GroupWithMatchesWithPlayersType, MatchWithPlayersType } from '~/server/db/schema'
 import MatchScoreForm from './MatchScoreForm'
 
+const getColor = (match: MatchWithPlayersType, player: 'player1' | 'player2') => {
+
+    if(!match || match.player1Score === null || match.player2Score === null){
+        return 'bg-darkGray'
+    }
+    if (player === 'player1') {
+        return match?.player1Score > match?.player2Score ? 'bg-specialRed' : 'bg-darkGray'
+    } else {
+        return match?.player2Score > match?.player1Score ? 'bg-specialRed' : 'bg-darkGray'
+    }
+}
+
 function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, handleClick: (match: MatchWithPlayersType) => void}) {
 
 
@@ -12,12 +24,12 @@ function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, h
             <div className='basis-[36px] h-full bg-white text-black flex items-center justify-center font-rubik text-[14px]'>
                 {match?.table}
             </div>
-            <div className='basis-[120px] h-full bg-darkGray text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center'>
+            <div className={`basis-[120px] h-full ${getColor(match, 'player1')} text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center`}>
                 {match?.player1?.name}
             </div>
             <div className='basis-[32px] h-full bg-darkGray text-black flex items-center justify-center font-rubik text-[10px] relative'>
                 {match?.player2Score || match?.player1Score ?
-                    <div className='text-white text-nowrap text-[14px] z-[1]'>{match?.player1Score ?? 0}-{match?.player2Score ?? 0}</div>
+                    <div className='text-white text-nowrap text-[14px] z-[1] px-[8px]'>{match?.player1Score ?? 0}-{match?.player2Score ?? 0}</div>
                     :
                     <>
                         <div className='text-white absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-[1]'>
@@ -27,7 +39,8 @@ function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, h
                 }
                 <img src="/svgs/RedThingy.svg" alt="redThingy" className='size-full absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-[0]' />
             </div>
-            <div className='basis-[120px] h-full bg-darkGray text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center'>
+            <div className={`basis-[120px] h-full ${getColor(match, 'player2')} text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center`}>
+
                 {match?.player2?.name}
             </div>
         </button>

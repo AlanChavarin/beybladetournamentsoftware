@@ -38,10 +38,8 @@ export default function createRoundRobin(players: PlayerType[], eventId: number,
             if (innerRound && innerRound[0] && innerRound[1]) {
                 matchesToCreate.push({
                     eventId,
-                    // @ts-ignore how the hell do i fix this
-                    player1: innerRound[0].playerId,
-                    // @ts-ignore how the hell do i fix this
-                    player2: innerRound[1].playerId,
+                    player1: innerRound[0].id,
+                    player2: innerRound[1].id,
                     round: i + 1,
                     table: j + 1,
                     groupId,

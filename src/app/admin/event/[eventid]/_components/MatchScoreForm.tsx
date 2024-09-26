@@ -32,13 +32,25 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, setValue, getValues, watch } = form
 
+    const handleScoreChange = (player: "player1" | "player2", score: number) => {
+        // make sure that the score cant be negative
+        if(score < 0){
+            return
+        }
+        setValue(player === "player1" ? "player1Score" : "player2Score", score)
+    }
+
     const onSubmit: SubmitHandler<FormSchemaType> = async (data) => {
         if(!openMatch?.eventId) return
         try {
             await updateMatch.mutateAsync({
                 matchId: openMatch.id,
+                eventId: openMatch.eventId,
+                player1Id: openMatch.player1.id,
+                player2Id: openMatch.player2.id,
                 player1Score: data.player1Score,
                 player2Score: data.player2Score,
+
             })
             utils.match.getMatchesByEventId.invalidate({eventId: openMatch.eventId})
             utils.group.getGroupsWithMatchesWithPlayersByEventId.invalidate({eventId: openMatch.eventId})
@@ -72,10 +84,10 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
                                 {openMatch.player1?.name}
                             </div>
                         </div>
-                        <button type='button' onClick={() => setValue("player1Score", getValues("player1Score") + 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
+                        <button type='button' onClick={() => handleScoreChange("player1", getValues("player1Score") + 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
                             <FontAwesomeIcon icon={faPlus} className='text-[24px]'/>
                         </button>
-                        <button type='button' onClick={() => setValue("player1Score", getValues("player1Score") - 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
+                        <button type='button' onClick={() => handleScoreChange("player1", getValues("player1Score") - 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
                             <FontAwesomeIcon icon={faMinus} className='text-[24px]'/>
                         </button>
                     </div>
@@ -88,10 +100,10 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
                                 {openMatch.player2?.name}
                             </div>
                         </div>
-                        <button type='button' onClick={() => setValue("player2Score", getValues("player2Score") + 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
+                        <button type='button' onClick={() => handleScoreChange("player2", getValues("player2Score") + 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
                             <FontAwesomeIcon icon={faPlus} className=' text-[24px]'/>
                         </button>
-                        <button type='button' onClick={() => setValue("player2Score", getValues("player2Score") - 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
+                        <button type='button' onClick={() => handleScoreChange("player2", getValues("player2Score") - 1)} className='bg-green w-[70px] h-[50px] rounded-[4px] flex items-center justify-center box-shadow-small2'>
                             <FontAwesomeIcon icon={faMinus} className=' text-[24px]'/>
                         </button>
                     </div>

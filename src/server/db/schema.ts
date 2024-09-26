@@ -24,23 +24,6 @@ import { relations } from 'drizzle-orm';
  */
 export const createTable = pgTableCreator((name) => `beybladetournamentsoftware_${name}`);
 
-// export const posts = createTable(
-//   "post",
-//   {
-//     id: serial("id").primaryKey(),
-//     name: varchar("name", { length: 256 }),
-//     createdAt: timestamp("created_at", { withTimezone: true })
-//       .default(sql`CURRENT_TIMESTAMP`)
-//       .notNull(),
-//     updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-//       () => new Date()
-//     ),
-//   },
-//   (example) => ({
-//     nameIndex: index("name_idx").on(example.name),
-//   })
-// )
-
 const deckListRequirementEnum = pgEnum("deck_list_requirement", ["top4", "topCut", "allPlayers"]);
 
 
@@ -72,51 +55,29 @@ export const events = createTable(
 
 export type EventType = InferSelectModel<typeof events>
 
+export const groups = createTable(
+  "group",
+  {
+    id: serial("id").primaryKey(),
+    eventId: integer("event_id").notNull().references(() => events.id),
+    groupLetter: varchar("group_letter", { length: 256 }),
+    numOfPlayers: integer("num_of_players").default(0),
+  }
+)
 
 export const players = createTable(
   "player",
   {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 256 }),
-    //eventId: integer("event_id").references(() => events.id),
-    //groupId: integer("group_id").references(() => groups.id),
+    eventId: integer("event_id").notNull().references(() => events.id),
+    groupId: integer("group_id").references(() => groups.id),
     numberOfWins: integer("number_of_wins").default(0),
-    totalWeightOfWinsBasedOnOpponentWins: integer("total_weight_of_wins_based_on_opponent_wins").default(0),
-    totalWeightOfWinsBasedOnScore: integer("total_weight_of_wins_based_on_score").default(0),
+    totalScore: integer("total_score").default(0),
   }
 )
 
 export type PlayerType = InferSelectModel<typeof players>
-
-// setup an event player relation
-export const eventPlayers = createTable(
-  "event_player",
-  {
-    id: serial("id").primaryKey(),
-    eventId: integer("event_id").notNull().references(() => events.id),
-    playerId: integer("player_id").notNull().references(() => players.id),
-  },
-  (table) => ({
-    eventPlayerUnique: uniqueIndex("event_player_unique_idx").on(table.eventId, table.playerId),
-  })
-)
-
-export const eventPlayersRelations = relations(eventPlayers, ({ one }) => ({
-  player: one(players, {
-    fields: [eventPlayers.playerId],
-    references: [players.id],
-  }),
-  event: one(events, {
-    fields: [eventPlayers.eventId],
-    references: [events.id],
-  }),
-}));
-
-export const playersRelations = relations(players, ({ many }) => ({
-  eventPlayers: many(eventPlayers),
-  groupPlayers: many(groupPlayers),
-}));
-
 
 export const matches = createTable(
   "match",
@@ -139,11 +100,11 @@ export const matches = createTable(
 export type MatchType = InferSelectModel<typeof matches>
 
 export const matchesRelations = relations(matches, ({ one }) => ({
-  eventId: one(events, {
+  event: one(events, {
     fields: [matches.eventId],
     references: [events.id],
   }),
-  groupId: one(groups, {
+  group: one(groups, {
     fields: [matches.groupId],
     references: [groups.id],
   }),
@@ -157,60 +118,34 @@ export const matchesRelations = relations(matches, ({ one }) => ({
   }),
 }));
 
-
-export const groups = createTable(
-  "group",
-  {
-    id: serial("id").primaryKey(),
-    eventId: integer("event_id").references(() => events.id),
-    groupLetter: varchar("group_letter", { length: 256 }),
-    numOfPlayers: integer("num_of_players").default(0),
-  }
-)
-
-export const groupRelations = relations(groups, ({ many }) => ({
+export const groupsRelations = relations(groups, ({ one, many }) => ({
+  event: one(events, {
+    fields: [groups.eventId],
+    references: [events.id],
+  }),
+  players: many(players),
   matches: many(matches),
 }));
 
-export const groupPlayers = createTable(
-  "group_player",
-  {
-    id: serial("id").primaryKey(),
-    groupId: integer("group_id").notNull().references(() => groups.id),
-    playerId: integer("player_id").notNull().references(() => players.id),
-    eventId: integer("event_id").notNull().references(() => events.id),
-  },
-  (table) => ({
-    groupPlayerUnique: uniqueIndex("group_player_unique_idx").on(table.groupId, table.playerId),
-  })
-)
-
-export const groupPlayersRelations = relations(groupPlayers, ({ one }) => ({
-  group: one(groups, {
-    fields: [groupPlayers.groupId],
-    references: [groups.id],
-  }),
-  player: one(players, {
-    fields: [groupPlayers.playerId],
-    references: [players.id],
-  }),
+export const playersRelations = relations(players, ({ one }) => ({
   event: one(events, {
-    fields: [groupPlayers.eventId],
+    fields: [players.eventId],
     references: [events.id],
   }),
+  group: one(groups, {
+    fields: [players.groupId],
+    references: [groups.id],
+  }),
 }));
 
-export const groupsRelations = relations(groups, ({ many }) => ({
-  groupPlayers: many(groupPlayers),
-}));
 
 export type GroupWithPlayersType = GroupType & {
   players: PlayerType[];
 };
 
 export type MatchWithPlayersType = MatchType & {
-  player1: PlayerType;
-  player2: PlayerType;
+  player1?: PlayerType;
+  player2?: PlayerType;
 };
 
 export type GroupWithMatchesWithPlayersType = GroupType & {

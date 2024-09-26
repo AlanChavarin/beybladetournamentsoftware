@@ -246,6 +246,41 @@
       "when": 1726752380574,
       "tag": "0034_absurd_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1727090364326,
+      "tag": "0035_loose_zodiak",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1727090661295,
+      "tag": "0036_hesitant_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1727090712960,
+      "tag": "0037_lonely_the_anarchist",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1727346598102,
+      "tag": "0038_parched_lenny_balinger",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "6",
+      "when": 1727350217412,
+      "tag": "0039_medical_triathlon",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_player" ALTER COLUMN "group_id" DROP NOT NULL;

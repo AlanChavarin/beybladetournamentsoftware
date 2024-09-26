@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import EventThumbnailComponent from "~/app/_components/EventThumbnailComponent"
-import { EventType, GroupType, formattedGroupWithMatchesWithPlayersType, GroupWithMatchesWithPlayersType, GroupWithPlayersType, MatchType, PlayerType } from "~/server/db/schema"
+import { EventType, GroupType, formattedGroupWithMatchesWithPlayersType, GroupWithMatchesWithPlayersType, MatchType, PlayerType, GroupWithPlayersType } from "~/server/db/schema"
 import { api } from "~/trpc/react"
 import { useRouter, useSearchParams } from 'next/navigation'
 import StandingsTab from './_components/StandingsTab'
@@ -54,10 +54,18 @@ const Page = ({ params }: { params: { eventid: string } }) => {
     if (fetchedEvent) {
       setEvent(fetchedEvent)
     }
-    setPlayers(fetchedPlayers)
-    setGroups(fetchedGroups)
-    setGroupsWithPlayers(fetchedGroupsWithPlayers)
-    setFormattedGroupsWithMatchesWithPlayers(fetchedGroupsWithMatchesWithPlayers)
+    if (fetchedPlayers) {
+      setPlayers(fetchedPlayers)
+    }
+    if (fetchedGroups) {
+      setGroups(fetchedGroups)
+    }
+    if (fetchedGroupsWithPlayers) {
+      setGroupsWithPlayers(fetchedGroupsWithPlayers)
+    }
+    if (fetchedGroupsWithMatchesWithPlayers) {
+      setFormattedGroupsWithMatchesWithPlayers(fetchedGroupsWithMatchesWithPlayers)
+    }
     //setGroupsWithMatches(fetchedGroupsWithMatches)
   }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers, fetchedGroupsWithMatchesWithPlayers])
 

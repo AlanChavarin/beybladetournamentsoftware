@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { events, groups, eventPlayers, groupPlayers, matches } from "~/server/db/schema";
-import { eq, sql, desc, asc } from "drizzle-orm";
+import { events, groups, matches, players } from "~/server/db/schema";
+import { eq, sql, desc, asc, inArray } from "drizzle-orm";
 
 export const eventRouter = createTRPCRouter({
   create: publicProcedure
@@ -121,13 +121,17 @@ export const eventRouter = createTRPCRouter({
       if (updatedEvent.length === 0) {
         throw new Error("Event not found");
       }
+
+      //clear the groupId for all players for this event
+      await ctx.db.update(players)
+        .set({
+          groupId: null
+        })
+        .where(eq(players.eventId, input.id));
       
       //delete matches for this event
-      await ctx.db.delete(matches).where(eq(matches.eventId, input.id));
-
-      // Delete existing group assignments
-      await ctx.db.delete(groupPlayers)
-        .where(eq(groupPlayers.eventId, input.id));
+      await ctx.db.delete(matches)
+        .where(eq(matches.eventId, input.id));
 
       // Delete existing groups for this event
       await ctx.db.delete(groups)
@@ -148,56 +152,55 @@ export const eventRouter = createTRPCRouter({
       let savedGroups = await ctx.db.insert(groups).values(newGroups).returning();
 
       // Fetch all players for this event
-      const players = await ctx.db.query.eventPlayers.findMany({
-        where: eq(eventPlayers.eventId, input.id),
+      const playerData = await ctx.db.query.players.findMany({
+        where: eq(players.eventId, input.id),
       });
 
       // Shuffle the players array
-      const shuffledPlayers = players.sort(() => Math.random() - 0.5);
+      const shuffledPlayers = playerData.sort(() => Math.random() - 0.5);
 
-      // Assign players to groups evenly
-      //const playersPerGroup = Math.ceil(shuffledPlayers.length / input.numOfGroups);
 
-      const groupAssignments: { 
-        eventId: number;
-        playerId: number;
+      const groupAssignments: {
         groupId: number;
-        groupLetter: string;
+        playerIds: number[];
       }[] = [];
 
-      let groupIndex = 0;
-      for (let i = 0; i < shuffledPlayers.length; i++) {
-        const player = shuffledPlayers[i];
-        let group = savedGroups[groupIndex];
-        if (player && player.playerId !== undefined && group && group.groupLetter !== null && group.numOfPlayers !== null) {
+      for (let i = 0; i < input.numOfGroups; i++) {
+        const group = savedGroups[i];
+        if (group) {
           groupAssignments.push({
-            eventId: input.id,
-            playerId: player.playerId,
-            groupLetter: group.groupLetter,
             groupId: group.id,
+            playerIds: [],
           });
-
-          group.numOfPlayers += 1;
-
-        }
-        if(groupIndex >= input.numOfGroups - 1){
-          groupIndex = 0;
-        } else {
-          groupIndex++;
         }
       }
 
-      // Insert new group assignments
+      for(let i = 0; i < shuffledPlayers.length; i++){
+        const player = shuffledPlayers[i];
+        const groupAssignment = groupAssignments[i % input.numOfGroups];
+        if (groupAssignment && player) {
+          groupAssignment.playerIds.push(player.id);
+        }
+      }
+
       if (groupAssignments.length > 0) {
-        await ctx.db.insert(groupPlayers).values(groupAssignments);
+        await Promise.all(groupAssignments.map(async (groupAssignment) => {
+          return ctx.db.update(players)
+            .set({
+              groupId: groupAssignment.groupId,
+            })
+            .where(inArray(players.id, groupAssignment.playerIds))
+            .returning();
+        }));
       }
 
       // Update the numOfPlayers for each group
-      for (const group of savedGroups) {
+      groupAssignments.forEach(async (groupAssignment) => {
         await ctx.db.update(groups)
-          .set({ numOfPlayers: group.numOfPlayers })
-          .where(eq(groups.id, group.id));
-      }
+          .set({ numOfPlayers: groupAssignment.playerIds.length })
+          .where(eq(groups.id, groupAssignment.groupId));
+      });
 
+      return updatedEvent;
     }),
 });

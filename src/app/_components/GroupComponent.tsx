@@ -50,6 +50,8 @@ function GroupComponent({event, header, players, showDeleteButton}: {event?: Eve
 						<div className="flex gap-[8px] items-center">
 							<div className="w-[24px] text-center">{index + 1}</div>
 							<div>{player.name}</div>
+                            <div>Wins: {player.numberOfWins}</div>
+                            <div>Score: {player.totalScore}</div>
 						</div>
 						{showDeleteButton && <button onClick={() => handleDeleteClick(player.name)} className="mr-[6px] px-[12px] bg-specialRed rounded-[4px] box-shadow-small3 text-white">
 							<FontAwesomeIcon icon={faX} />
