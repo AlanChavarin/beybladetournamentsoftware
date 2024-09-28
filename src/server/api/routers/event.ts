@@ -122,10 +122,12 @@ export const eventRouter = createTRPCRouter({
         throw new Error("Event not found");
       }
 
-      //clear the groupId for all players for this event
+      //clear the groupId and reset the wins and score for all players for this event
       await ctx.db.update(players)
         .set({
-          groupId: null
+          groupId: null,
+          numberOfWins: 0,
+          totalScore: 0,
         })
         .where(eq(players.eventId, input.id));
       
@@ -136,6 +138,10 @@ export const eventRouter = createTRPCRouter({
       // Delete existing groups for this event
       await ctx.db.delete(groups)
         .where(eq(groups.eventId, input.id));
+
+      await ctx.db.update(events).set({
+        isFirstStageComplete: false
+      }).where(eq(events.id, input.id));
 
       // Create new groups based on the updated numOfGroups
       const newGroups = [];

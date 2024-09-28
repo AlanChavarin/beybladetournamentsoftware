@@ -12,7 +12,8 @@ import {
   timestamp,
   varchar,
   json,
-  uniqueIndex
+  uniqueIndex,
+  boolean
 } from "drizzle-orm/pg-core";
 import { relations } from 'drizzle-orm';
 
@@ -46,6 +47,7 @@ export const events = createTable(
     ),
     numOfGroups: integer("num_of_groups").default(0),
     howManyFromEachGroupAdvance: integer("how_many_from_each_group_advance").default(2),
+    isFirstStageComplete: boolean("is_first_stage_complete").default(false),
 
   },
   (example) => ({

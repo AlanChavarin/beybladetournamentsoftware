@@ -28,7 +28,7 @@ function Page({ params }: { params: { eventid: string } }) {
           case 'Your Pairings':
               return <YourPairings />
           case 'Standings':
-              return <StandingsTab groupsWithPlayers={groupsWithPlayers || []}/>
+              return event ? <StandingsTab event={event} groupsWithPlayers={groupsWithPlayers || []}/> : <></>
           case 'Deck List':
               return <>Deck List</>
           default:

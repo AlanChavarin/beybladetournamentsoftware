@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "is_first_stage_complete" boolean DEFAULT false;

@@ -19,8 +19,11 @@ export const groupRouter = createTRPCRouter({
         const groupsWithPlayers: GroupWithPlayersType[] = await ctx.db.query.groups.findMany({
             where: eq(groups.eventId, input.eventId),
             with: {
-                players: true
-            }
+                players: {
+                    orderBy: [desc(players.numberOfWins), desc(players.totalScore)]
+                }
+            },
+            orderBy: asc(groups.groupLetter)
         })
 
         return groupsWithPlayers
@@ -70,8 +73,6 @@ export const groupRouter = createTRPCRouter({
                     }
                 }
             })
-
-            console.log(groupsWithMatchesWithPlayers)
 
             // i want to reformat matches of the same round are put into their own array
             const reformattedGroupsWithMatchesWithPlayers: formattedGroupWithMatchesWithPlayersType[] = groupsWithMatchesWithPlayers.map(group => {

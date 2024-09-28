@@ -11,8 +11,8 @@ import { toast } from "react-toastify"
 import { useEffect } from "react"
 
 const formSchema = z.object({
-    player1Score: z.number().min(0),
-    player2Score: z.number().min(0),
+    player1Score: z.coerce.number().min(0),
+    player2Score: z.coerce.number().min(0),
 })
 
 type FormSchemaType = z.infer<typeof formSchema>
@@ -54,6 +54,9 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
             })
             utils.match.getMatchesByEventId.invalidate({eventId: openMatch.eventId})
             utils.group.getGroupsWithMatchesWithPlayersByEventId.invalidate({eventId: openMatch.eventId})
+            utils.player.getPlayersByEventId.invalidate({eventId: openMatch.eventId})
+            utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: openMatch.eventId})
+            utils.event.getById.invalidate({id: openMatch.eventId})
             setOpenMatch(undefined)
         } catch (error) {
             toast.error((error as Error).message)
@@ -77,9 +80,10 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[8px] p-[16px] items-center">
                     <div className='flex flex-row gap-[8px]'>
                         <div className='text-[16px] flex items-center gap-[8px] w-[150px] min-h-[50px] bg-darkGray  text-white px-[4px] py-[2px] box-shadow-small2'>
-                            <div className='text-[24px] px-[12px]'>
+                            {/* <div className='text-[24px] px-[12px]'>
                                 {watch("player1Score")}
-                            </div>
+                            </div> */}
+                            <input type="number" min={0} {...register("player1Score")} name="player1Score" className='text-[24px] px-[12px] bg-darkGray appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none w-[50px] text-center'/>
                             <div className='font-semibold'>
                                 {openMatch.player1?.name}
                             </div>
@@ -93,10 +97,11 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
                     </div>
                     <div className='flex flex-row gap-[8px]'>
                         <div className='text-[16px] flex items-center gap-[8px] w-[150px] min-h-[50px] bg-darkGray  text-white px-[4px] py-[2px] box-shadow-small2'>
-                            <div className='text-[24px] px-[12px]'>
+                            {/* <div className='basis-[36px] flex-1 text-[24px] px-[12px]'>
                                 {watch("player2Score")} 
-                            </div>
-                            <div className='font-semibold'>
+                            </div> */}
+                            <input type="number" min={0} {...register("player2Score")} name="player2Score" className='text-[24px] px-[12px] bg-darkGray appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none outline-none w-[50px] text-center'/>
+                            <div className='basis-[120px] font-semibold'>
                                 {openMatch.player2?.name}
                             </div>
                         </div>

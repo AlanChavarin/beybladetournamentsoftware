@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { matches, events, MatchType, groups, players, GroupWithPlayersType } from "~/server/db/schema";
-import { eq, sql, asc, and } from "drizzle-orm";
+import { eq, sql, asc, and, or, gt } from "drizzle-orm";
 import createRoundRobin from "~/server/createRoundRobin";
 
 export const matchRouter = createTRPCRouter({
@@ -54,7 +54,7 @@ export const matchRouter = createTRPCRouter({
         .mutation(async ({ ctx, input }) => {
             const [newMatch] = await ctx.db.update(matches).set({ player1Score: input.player1Score, player2Score: input.player2Score }).where(eq(matches.id, input.matchId)).returning();
 
-            const player1TotalScore: number = (await ctx.db.query.matches.findMany({
+            const player1TotalScore1: number = (await ctx.db.query.matches.findMany({
                 where: and(
                     eq(matches.player1, input.player1Id),
                     eq(matches.eventId, input.eventId)
@@ -68,7 +68,23 @@ export const matchRouter = createTRPCRouter({
                 return acc;
             }, 0);
 
-            const player1TotalWins = (await ctx.db.query.matches.findMany({
+            const player1TotalScore2: number = (await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.player2, input.player1Id),
+                    eq(matches.eventId, input.eventId)
+                )
+            }))
+            .map(match => match.player2Score)
+            .reduce((acc: number, curr) => {
+                if(curr !== null && acc !== null){
+                    return acc + curr;
+                }
+                return acc;
+            }, 0);
+
+            const player1TotalScore = player1TotalScore1 + player1TotalScore2;
+
+            const player1TotalWins1 = (await ctx.db.query.matches.findMany({
                 where: and(
                     eq(matches.player1, input.player1Id),
                     eq(matches.eventId, input.eventId)
@@ -86,7 +102,41 @@ export const matchRouter = createTRPCRouter({
                 return acc;
             }, 0);
 
-            const player2TotalScore: number = (await ctx.db.query.matches.findMany({
+            const player1TotalWins2 = (await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.player2, input.player1Id),
+                    eq(matches.eventId, input.eventId)
+                )
+            }))
+            .reduce((acc, curr) => {
+                const player1Score = curr?.player1Score;
+                const player2Score = curr?.player2Score;
+                if(player1Score === null || player2Score === null){
+                    return acc;
+                }
+                if(player1Score < player2Score){
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+
+            const player1TotalWins = player1TotalWins1 + player1TotalWins2;
+
+            const player2TotalScore1: number = (await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.player1, input.player2Id),
+                    eq(matches.eventId, input.eventId)
+                )
+            }))
+            .map(match => match.player1Score)
+            .reduce((acc: number, curr) => {
+                if(curr !== null && acc !== null){
+                    return acc + curr;
+                }
+                return acc
+            }, 0);
+
+            const player2TotalScore2: number = (await ctx.db.query.matches.findMany({
                 where: and(
                     eq(matches.player2, input.player2Id),
                     eq(matches.eventId, input.eventId)
@@ -97,10 +147,30 @@ export const matchRouter = createTRPCRouter({
                 if(curr !== null && acc !== null){
                     return acc + curr;
                 }
-                return acc
+                return acc;
             }, 0);
 
-            const player2TotalWins: number = (await ctx.db.query.matches.findMany({
+            const player2TotalScore = player2TotalScore1 + player2TotalScore2;
+
+            const player2TotalWins1: number = (await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.player1, input.player2Id),
+                    eq(matches.eventId, input.eventId)
+                )
+            }))
+            .reduce((acc, curr) => {
+                const player1Score = curr?.player1Score;
+                const player2Score = curr?.player2Score;
+                if(player2Score === null || player1Score === null){
+                    return acc;
+                }
+                if(player2Score < player1Score){
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+
+            const player2TotalWins2 = (await ctx.db.query.matches.findMany({
                 where: and(
                     eq(matches.player2, input.player2Id),
                     eq(matches.eventId, input.eventId)
@@ -118,6 +188,8 @@ export const matchRouter = createTRPCRouter({
                 return acc;
             }, 0);
 
+            const player2TotalWins = player2TotalWins1 + player2TotalWins2;
+
             await ctx.db.update(players).set({
                 totalScore: player1TotalScore,
                 numberOfWins: player1TotalWins
@@ -127,6 +199,25 @@ export const matchRouter = createTRPCRouter({
                 totalScore: player2TotalScore,
                 numberOfWins: player2TotalWins
             }).where(eq(players.id, input.player2Id));
+
+            // check if all matches are played by checking of either player's score is greater than 0
+            const matchesForEvent = await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.eventId, input.eventId),
+                    and(
+                        eq(matches.player1Score, 0),
+                        eq(matches.player2Score, 0)
+                    )
+                )
+
+            })
+
+            // if all matches are played, set the event's isFirstStageComplete to true
+            if(matchesForEvent.length === 0){
+                await ctx.db.update(events).set({
+                    isFirstStageComplete: true
+                }).where(eq(events.id, input.eventId));
+            }
 
             return {
                 player1TotalScore,

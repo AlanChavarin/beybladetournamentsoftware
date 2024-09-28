@@ -281,6 +281,13 @@
       "when": 1727350217412,
       "tag": "0039_medical_triathlon",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1727511077389,
+      "tag": "0040_elite_shadow_king",
+      "breakpoints": true
     }
   ]
 }

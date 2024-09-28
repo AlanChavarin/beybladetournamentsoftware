@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { formattedGroupWithMatchesWithPlayersType, GroupType, GroupWithMatchesWithPlayersType, MatchWithPlayersType } from '~/server/db/schema'
 import MatchScoreForm from './MatchScoreForm'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck } from '@fortawesome/free-solid-svg-icons'
 
 const getColor = (match: MatchWithPlayersType, player: 'player1' | 'player2') => {
 
@@ -16,13 +18,18 @@ const getColor = (match: MatchWithPlayersType, player: 'player1' | 'player2') =>
     }
 }
 
+const checkIfComplete = (match: MatchWithPlayersType) => {
+    return match?.player1Score || match?.player2Score
+}
+
 function GroupCarouselItem({match, handleClick}: {match: MatchWithPlayersType, handleClick: (match: MatchWithPlayersType) => void}) {
 
 
     return (
         <button className='bg-darkGray w-full h-[32px] flex items-center justify-start box-shadow-small2' onClick={() => handleClick(match)}>
-            <div className='basis-[36px] h-full bg-white text-black flex items-center justify-center font-rubik text-[14px]'>
+            <div className={`min-w-[36px] h-full ${checkIfComplete(match) ? 'bg-lightGray5' : 'bg-white'} text-black flex items-center justify-center font-rubik text-[14px]`}>
                 {match?.table}
+                {checkIfComplete(match) ? <FontAwesomeIcon icon={faCheck}/> : <></>}
             </div>
             <div className={`basis-[120px] h-full ${getColor(match, 'player1')} text-white flex items-center justify-center font-rubik text-[10px] flex-1 text-center`}>
                 {match?.player1?.name}

@@ -30,7 +30,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
     if (!event) return <div>Loading...</div>
     switch (activeTab) {
         case 'Standings':
-            return <StandingsTab groupsWithPlayers={groupsWithPlayers || []}/>
+            return <StandingsTab groupsWithPlayers={groupsWithPlayers || []} event={event}/>
         case 'Settings':
             return <SettingsTab groups={groups || []} event={event} players={players || []}/>
         case 'Group Stage':
@@ -52,6 +52,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
 
   useEffect(() => {
     if (fetchedEvent) {
+      console.log("fetchedEvent", fetchedEvent)
       setEvent(fetchedEvent)
     }
     if (fetchedPlayers) {
