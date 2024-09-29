@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { events, groups, matches, players } from "~/server/db/schema";
-import { eq, sql, desc, asc, inArray } from "drizzle-orm";
+import { events, groups, GroupType, matches, players, PlayerType } from "~/server/db/schema";
+import { eq, sql, desc, asc, inArray, and } from "drizzle-orm";
 
 export const eventRouter = createTRPCRouter({
   create: publicProcedure
@@ -208,5 +208,86 @@ export const eventRouter = createTRPCRouter({
       });
 
       return updatedEvent;
+    }),
+
+    checkIfFirstStageIsComplete: publicProcedure
+    .input(z.object({ eventId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.eventId),
+      });
+
+      if(!event){
+        throw new Error("Event not found");
+      }
+
+      if(!event.promptToCompleteFirstStage){
+        throw new Error("Event is not ready or prompted to complete first stage");
+      }
+
+      // check if all matches are played by checking of either player's score is greater than 0
+      const matchesForEvent = await ctx.db.query.matches.findMany({
+        where: and(
+            eq(matches.eventId, input.eventId),
+            and(
+                eq(matches.player1Score, 0),
+                eq(matches.player2Score, 0)
+            )
+        )
+
+      })
+
+      // if all matches are played, set the event's isFirstStageComplete to true
+      if(matchesForEvent.length === 0){
+          await ctx.db.update(events).set({
+              isFirstStageComplete: true
+          }).where(eq(events.id, input.eventId));
+      }
+
+      // GENERATE FINAL STAGE MATCHES
+      let topCutPlayers: PlayerType[] = []
+
+      if(!event.numOfGroups){
+        throw new Error("Event does not have any groups");
+      }
+
+      if(!event.howManyFromEachGroupAdvance){
+        throw new Error("Event does not have any players to advance");
+      }
+      
+      const numOfPlayersToAdvance: number = event.howManyFromEachGroupAdvance
+
+      const groupsFromEvent: GroupType[] = await ctx.db.query.groups.findMany({
+        where: eq(groups.eventId, input.eventId),
+      })
+
+      if(!groupsFromEvent){
+        throw new Error("Event does not have any groups");
+      }
+      
+      const topPlayersPromises = groupsFromEvent.map(group => 
+        ctx.db.query.players.findMany({
+          where: eq(players.groupId, group.id),
+          orderBy: [desc(players.numberOfWins), desc(players.totalScore)],
+          limit: numOfPlayersToAdvance
+        })
+      );
+
+      const topPlayersGroups = await Promise.all(topPlayersPromises);
+      topCutPlayers = topPlayersGroups.flat();
+
+      //console.log("topCutPlayers", topCutPlayers);
+
+      //create the matches using our topCutPlayers
+
+      // check that the number of players is a power of 2
+      // if(!Number.isInteger(Math.log2(topCutPlayers.length))){
+      //   throw new Error("Number of players is not a power of 2");
+      // }
+
+      return {
+        isFirstStageComplete: event.isFirstStageComplete
+      }
     }),
 });

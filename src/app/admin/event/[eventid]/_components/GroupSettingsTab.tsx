@@ -69,9 +69,9 @@ function GroupSettingsTab({groups, event}: {groups: GroupType[], event: EventTyp
                     </button>
                 </div>
                 <div className="flex gap-[8px] max-w-[320px] w-full">
-                    <div className="bg-darkGray text-white py-[4px] gap-[14px] h-[52px] flex items-center justify-start box-shadow-small2 basis-[50%] px-[12px]">
+                    <div className="bg-darkGray text-white py-[4px] gap-[8px] h-[52px] flex items-center justify-start box-shadow-small2 basis-[50%] px-[12px]">
                         <div className="font-bold text-[24px]">{form.watch('advanceFromEachGroup')}</div> 
-                        <div className="text-[14px] text-center flex-1">Advance from <br/> each group</div>
+                        <div className="text-[12px] text-center flex-1">Advance from <br/> each group</div>
                     </div>
                     <button type="button" className="bg-green hover:bg-greenHover rounded-[4px] box-shadow-small2 flex items-center justify-center flex-1" onClick={() => form.setValue('advanceFromEachGroup', form.getValues('advanceFromEachGroup') + 1)}>
                         <FontAwesomeIcon icon={faPlus} className="size-[20px]"/>

@@ -288,6 +288,20 @@
       "when": 1727511077389,
       "tag": "0040_elite_shadow_king",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "6",
+      "when": 1727609930671,
+      "tag": "0041_powerful_mattie_franklin",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "6",
+      "when": 1727613162735,
+      "tag": "0042_nosy_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

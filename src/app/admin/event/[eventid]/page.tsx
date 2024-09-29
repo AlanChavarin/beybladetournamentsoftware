@@ -34,7 +34,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
         case 'Settings':
             return <SettingsTab groups={groups || []} event={event} players={players || []}/>
         case 'Group Stage':
-            return <GroupStage formattedGroupsWithMatchesWithPlayers={formattedGroupsWithMatchesWithPlayers || []}/>
+            return <GroupStage event={event} formattedGroupsWithMatchesWithPlayers={formattedGroupsWithMatchesWithPlayers || []}/>
         case 'Final Stage':
             return <FinalStage/>
         default:

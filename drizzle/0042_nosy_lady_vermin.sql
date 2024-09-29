@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_match" ADD COLUMN "final_stage_match" boolean DEFAULT false;

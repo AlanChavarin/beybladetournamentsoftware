@@ -21,6 +21,15 @@ function StandingsTab({event, groupsWithPlayers, dontShowCode}: {event: EventTyp
           <GroupComponent header={`Group ${group.groupLetter}`} players={group.players} showScores={true} event={event} />
       ))}
 
+      { groupsWithPlayers && groupsWithPlayers.length === 0 && 
+        <div className="text-white font-rubik text-[14px] flex gap-[8px] bg-darkGray p-[8px] w-full box-shadow-small2">
+          <FontAwesomeIcon icon={faCircleExclamation}  className='w-[20px] h-[20px]'/>
+          <div>
+            No groups found
+          </div>
+        </div>
+      }
+
     </div>
 
   )

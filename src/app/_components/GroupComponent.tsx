@@ -1,5 +1,5 @@
 'use client'
-import { faX, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
+import { faX, faExclamationTriangle, faCircleExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { EventType, PlayerType } from "~/server/db/schema"
 import { useEffect, useState } from "react"
@@ -34,17 +34,13 @@ function GroupComponent({event, header, players, showDeleteButton, showScores}: 
 		setPlayerToDelete("")
 	}
 
-    useEffect(() => {
-        console.log("event is first stage complete", event?.isFirstStageComplete)
-    }, [event?.isFirstStageComplete])
-
 	return (
 		<div className="box-shadow-small2 w-full">
 			{/* label showing what group this is */}
 			<div className="text-white font-rubik text-[14px] flex gap-[8px] bg-darkGray p-[4px] w-full relative">
 				<div className="ml-[6px] relative z-10 flex items-center">
                     <div className="w-[150px]">
-                        {header}
+                        {header} 
                     </div>
                     {showScores && <div className="w-[40px] font-sans text-[12px] font-semibold">Wins</div>}
                     {showScores && <div className="w-[40px] font-sans text-[12px] font-semibold">Score</div>}
@@ -71,6 +67,7 @@ function GroupComponent({event, header, players, showDeleteButton, showScores}: 
 					</div>
 				))}
 			</div>
+            
 			{playerToDelete && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
 					<div className="bg-lightGray3 box-shadow-small2 w-full max-w-[300px]">

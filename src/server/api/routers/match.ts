@@ -19,6 +19,20 @@ export const matchRouter = createTRPCRouter({
     createMatchesBasedOnEvent: publicProcedure
         .input(z.object({eventId: z.number()}))
         .mutation(async ({ctx, input}) => {
+            
+            const event = await ctx.db.query.events.findFirst({
+                where: eq(events.id, input.eventId)
+            })
+            
+            if(!event){
+                throw new Error("Event not found");
+            }
+            
+            if(event.isFirstStageComplete){
+                throw new Error("First stage is already complete");
+            }
+            
+            
             const groupsWithPlayersRawData = await ctx.db.query.groups.findMany({
                 where: eq(groups.eventId, input.eventId),
                 orderBy: asc(groups.groupLetter),
@@ -26,7 +40,7 @@ export const matchRouter = createTRPCRouter({
                     players: true
                 }
             })
-
+            
             if(!groupsWithPlayersRawData){
                 throw new Error("Failed to get groups with players");
             }
@@ -52,6 +66,19 @@ export const matchRouter = createTRPCRouter({
             player2Score: z.number()
         }))
         .mutation(async ({ ctx, input }) => {
+
+            const event = await ctx.db.query.events.findFirst({
+                where: eq(events.id, input.eventId)
+            })
+
+            if(!event){
+                throw new Error("Event not found");
+            }
+
+            if(event.isFirstStageComplete){
+                throw new Error("First stage is already complete");
+            }
+
             const [newMatch] = await ctx.db.update(matches).set({ player1Score: input.player1Score, player2Score: input.player2Score }).where(eq(matches.id, input.matchId)).returning();
 
             const player1TotalScore1: number = (await ctx.db.query.matches.findMany({
@@ -215,7 +242,11 @@ export const matchRouter = createTRPCRouter({
             // if all matches are played, set the event's isFirstStageComplete to true
             if(matchesForEvent.length === 0){
                 await ctx.db.update(events).set({
-                    isFirstStageComplete: true
+                    promptToCompleteFirstStage: true
+                }).where(eq(events.id, input.eventId));
+            } else {
+                await ctx.db.update(events).set({
+                    promptToCompleteFirstStage: false
                 }).where(eq(events.id, input.eventId));
             }
 
