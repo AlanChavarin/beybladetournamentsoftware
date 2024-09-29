@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { events, groups, GroupType, matches, players, PlayerType } from "~/server/db/schema";
+import { events, groups, GroupType, matches, MatchType, players, PlayerType } from "~/server/db/schema";
 import { eq, sql, desc, asc, inArray, and } from "drizzle-orm";
 
 export const eventRouter = createTRPCRouter({
@@ -282,9 +282,47 @@ export const eventRouter = createTRPCRouter({
       //create the matches using our topCutPlayers
 
       // check that the number of players is a power of 2
-      // if(!Number.isInteger(Math.log2(topCutPlayers.length))){
-      //   throw new Error("Number of players is not a power of 2");
-      // }
+      if(!Number.isInteger(Math.log2(topCutPlayers.length))){
+        throw new Error("Number of players is not a power of 2");
+      }
+
+      topCutPlayers.sort((a, b) => (a.numberOfWins || 0) - (b.numberOfWins || 0)).sort((a, b) => (a.totalScore || 0) - (b.totalScore || 0));
+
+      let matchesToCreate: {
+        eventId: number;
+        player1: number;
+        player2: number;
+        player1Score: number;
+        player2Score: number;
+        finalStageMatch: boolean;
+        round: number;
+        table: number;
+      }[] = []
+
+      for(let i = 0; i < topCutPlayers.length/2; i++){
+        
+        const player1 = topCutPlayers[i];
+        const player2 = topCutPlayers[topCutPlayers.length - 1 - i];
+        
+        if(!player1 || !player2){
+          throw new Error("Player not found");
+        }
+        const match = {
+          eventId: input.eventId,
+          player1: player1.id,
+          player2: player2.id,
+          player1Score: 0,
+          player2Score: 0,
+          finalStageMatch: true,
+          round: 1,
+          table: i + 1,
+        }
+
+        matchesToCreate.push(match);
+
+      }
+      
+      //await ctx.db.insert(matches).values(matchesToCreate).returning();
 
       return {
         isFirstStageComplete: event.isFirstStageComplete
