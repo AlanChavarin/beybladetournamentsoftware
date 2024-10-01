@@ -288,39 +288,79 @@ export const eventRouter = createTRPCRouter({
 
       topCutPlayers.sort((a, b) => (a.numberOfWins || 0) - (b.numberOfWins || 0)).sort((a, b) => (a.totalScore || 0) - (b.totalScore || 0));
 
-      let matchesToCreate: {
-        eventId: number;
-        player1: number;
-        player2: number;
-        player1Score: number;
-        player2Score: number;
-        finalStageMatch: boolean;
-        round: number;
-        table: number;
-      }[] = []
+      const topCutRounds = Math.log2(topCutPlayers.length)
 
-      for(let i = 0; i < topCutPlayers.length/2; i++){
-        
-        const player1 = topCutPlayers[i];
-        const player2 = topCutPlayers[topCutPlayers.length - 1 - i];
-        
-        if(!player1 || !player2){
-          throw new Error("Player not found");
-        }
-        const match = {
-          eventId: input.eventId,
-          player1: player1.id,
-          player2: player2.id,
-          player1Score: 0,
-          player2Score: 0,
-          finalStageMatch: true,
-          round: 1,
-          table: i + 1,
+      let matchesIdArray: (number | null)[] = []
+
+      for(let i = 0; i < topCutRounds; i++){
+
+        let matchesToCreate: {
+            eventId: number;
+            player1: number | null;
+            player2: number | null;
+            player1Score: number;
+            player2Score: number;
+            finalStageMatch: boolean;
+            nextTopCutMatchId: number | null;
+            round: number;
+            table: number;
+        }[] = []
+
+
+        for(let j = 0; j < (2 ** i); j++){
+
+          let nextTopCutMatchId: number | null = null
+
+          if(i !== 0){
+            const tempMatchId = matchesIdArray[Math.floor((matchesIdArray.length + j - 1)/2)]
+            if(tempMatchId){
+              nextTopCutMatchId = tempMatchId
+            }
+          }
+
+          matchesToCreate.push({
+            eventId: input.eventId,
+            player1: null,
+            player2: null,
+            player1Score: 0,
+            player2Score: 0,
+            finalStageMatch: true,
+            nextTopCutMatchId: nextTopCutMatchId,
+            round: i + 1,
+            table: j + 1, 
+          })
         }
 
-        matchesToCreate.push(match);
+        const createdMatches: MatchType[] = await ctx.db.insert(matches).values(matchesToCreate).returning();
+
+        matchesIdArray = matchesIdArray.concat(createdMatches.map(match => match.id))
 
       }
+
+
+
+      // for(let i = 0; i < topCutPlayers.length/2; i++){
+        
+      //   const player1 = topCutPlayers[i];
+      //   const player2 = topCutPlayers[topCutPlayers.length - 1 - i];
+        
+      //   if(!player1 || !player2){
+      //     throw new Error("Player not found");
+      //   }
+      //   const match = {
+      //     eventId: input.eventId,
+      //     player1: player1.id,
+      //     player2: player2.id,
+      //     player1Score: 0,
+      //     player2Score: 0,
+      //     finalStageMatch: true,
+      //     round: 1,
+      //     table: i + 1,
+      //   }
+
+      //   matchesToCreate.push(match);
+
+      // }
       
       //await ctx.db.insert(matches).values(matchesToCreate).returning();
 

@@ -92,12 +92,10 @@ export const matches = createTable(
     player2: integer("player2_id").references(() => players.id),
     player1Score: integer("player1_score").default(0),
     player2Score: integer("player2_score").default(0),
-    // make this null by default
-    // winner: integer("winner").references(() => players.id).default(sql`NULL`),
     round: integer("round"),
     table: integer("table"),
     finalStageMatch: boolean("final_stage_match").default(false),
-
+    nextTopCutMatchId: integer("nextTopCutMatch_id")
   }
 )
 
@@ -120,6 +118,10 @@ export const matchesRelations = relations(matches, ({ one }) => ({
     fields: [matches.player2],
     references: [players.id],
   }),
+  nextTopCutMatch: one(matches, {
+    fields: [matches.nextTopCutMatchId],
+    references: [matches.id]
+  })
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({

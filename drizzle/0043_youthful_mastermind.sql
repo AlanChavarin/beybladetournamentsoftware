@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_match" ADD COLUMN "nextTopCutMatch_id" integer;
