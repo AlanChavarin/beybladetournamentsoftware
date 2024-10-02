@@ -3,12 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import useEmblaCarousel from "embla-carousel-react"
 import { useState } from "react"
 import { DotButton, useDotButton } from "~/app/_components/EmblaCarouselDotButton"
-import { MatchType, MatchWithPlayersType } from "~/server/db/schema"
+import { EventType, MatchType, MatchWithPlayersType } from "~/server/db/schema"
 import MatchScoreForm from "./MatchScoreForm"
 import GroupCarouselItem from "./GroupCarouselItem"
 
 
-function TopCutStageCarousel({topCutMatchesWithPlayers}: {topCutMatchesWithPlayers: MatchWithPlayersType[][]}) {
+function TopCutStageCarousel({event, topCutMatchesWithPlayers}: {event: EventType, topCutMatchesWithPlayers: MatchWithPlayersType[][]}) {
     const [emblaRef, emblaApi] = useEmblaCarousel({ 
         loop: false,
         startIndex: 0
@@ -27,6 +27,9 @@ function TopCutStageCarousel({topCutMatchesWithPlayers}: {topCutMatchesWithPlaye
     const [openMatch, setOpenMatch] = useState<MatchWithPlayersType | undefined>(undefined)
 
     const handleClick = (match: MatchWithPlayersType) => { 
+        if(event.isFinalStageComplete){
+            return
+        }
         setOpenMatch(match)
     }
 

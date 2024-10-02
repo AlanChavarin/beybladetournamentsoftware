@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "is_final_stage_locked_in" boolean DEFAULT false;

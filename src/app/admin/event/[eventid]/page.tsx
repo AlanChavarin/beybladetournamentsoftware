@@ -37,7 +37,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
         case 'Group Stage':
             return <GroupStage event={event} formattedGroupsWithMatchesWithPlayers={formattedGroupsWithMatchesWithPlayers || []}/>
         case 'Final Stage':
-            return <FinalStage topCutMatchesWithPlayers={topCutMatchesWithPlayers || []}/>
+            return <FinalStage event={event} topCutMatchesWithPlayers={topCutMatchesWithPlayers || []}/>
         default:
             return <>None</>
     }

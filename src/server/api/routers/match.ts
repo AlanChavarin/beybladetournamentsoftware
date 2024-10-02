@@ -7,14 +7,14 @@ import createRoundRobin from "~/server/createRoundRobin";
 export const matchRouter = createTRPCRouter({
 
     getMatchesByEventId: publicProcedure
-    .input(z.object({
-        eventId: z.number(),
-    }))
-    .query(async ({ ctx, input }) => {
-        return ctx.db.query.matches.findMany({
-            where: eq(matches.eventId, input.eventId),
-        });
-    }),
+        .input(z.object({
+            eventId: z.number(),
+        }))
+        .query(async ({ ctx, input }) => {
+            return ctx.db.query.matches.findMany({
+                where: eq(matches.eventId, input.eventId),
+            });
+        }),
 
     createMatchesBasedOnEvent: publicProcedure
         .input(z.object({eventId: z.number()}))
@@ -352,45 +352,96 @@ export const matchRouter = createTRPCRouter({
                 throw new Error("Failed to update match");
             }
 
-            if(newMatch.nextTopCutMatchId === null){
-                return
-            }
 
-            const nextTopCutMatch = await ctx.db.query.matches.findFirst({
-                where: eq(matches.id, newMatch.nextTopCutMatchId)
-            })
+            let nextTopCutMatch: MatchType | null | undefined = null;
+            if(newMatch.nextTopCutMatchId){
+                nextTopCutMatch = await ctx.db.query.matches.findFirst({
+                    where: eq(matches.id, newMatch.nextTopCutMatchId)
+                })
+            }
             
-            console.log(nextTopCutMatch?.topCutPlayerSlotToMoveTo)
-
-            if(!nextTopCutMatch){
-                throw new Error("Next top cut match not found");
-            }
 
             if(newMatch.player1Score > newMatch.player2Score){
-                if(newMatch.topCutPlayerSlotToMoveTo === 1){
+                if(newMatch.topCutPlayerSlotToMoveTo === 1 && nextTopCutMatch){
                     await ctx.db.update(matches).set({
                         player1: newMatch.player1,
+                        player1Score: 0,
+                        player2Score: 0,
+
                     }).where(eq(matches.id, nextTopCutMatch.id)).returning();
-                } else if(newMatch.topCutPlayerSlotToMoveTo === 2){
+                } else if(newMatch.topCutPlayerSlotToMoveTo === 2 && nextTopCutMatch){
                     await ctx.db.update(matches).set({
                         player2: newMatch.player1,
+                        player1Score: 0,
+                        player2Score: 0,
                     }).where(eq(matches.id, nextTopCutMatch.id)).returning();
+                }
+
+                const currentRound: number | null = newMatch.round;
+
+                if(currentRound !== null && newMatch.player1 !== null && newMatch.player2 !== null){
+                    await ctx.db.update(players).set({
+                        topCutMatchPlacement: (2 ** (event.numOfTopCutRounds - currentRound))
+                    }).where(eq(players.id, newMatch.player1)).returning();
+
+                    await ctx.db.update(players).set({
+                        topCutMatchPlacement: (2 ** (event.numOfTopCutRounds - currentRound + 1))
+                    }).where(eq(players.id, newMatch.player2)).returning();
                 }
             } else if (newMatch.player2Score > newMatch.player1Score){
-                if(newMatch.topCutPlayerSlotToMoveTo === 1){
+                if(newMatch.topCutPlayerSlotToMoveTo === 1 && nextTopCutMatch){
                     await ctx.db.update(matches).set({
                         player1: newMatch.player2,
+                        player1Score: 0,
+                        player2Score: 0,
                     }).where(eq(matches.id, nextTopCutMatch.id)).returning();
-                } else if(newMatch.topCutPlayerSlotToMoveTo === 2){
+                } else if(newMatch.topCutPlayerSlotToMoveTo === 2 && nextTopCutMatch){
                     await ctx.db.update(matches).set({
                         player2: newMatch.player2,
+                        player1Score: 0,
+                        player2Score: 0,
                     }).where(eq(matches.id, nextTopCutMatch.id)).returning();
                 }
+
+                const currentRound: number | null = newMatch.round;
+
+                if(currentRound !== null && newMatch.player1 !== null && newMatch.player2 !== null){
+                    await ctx.db.update(players).set({
+                        topCutMatchPlacement: (2 ** (event.numOfTopCutRounds - currentRound + 1))
+                    }).where(eq(players.id, newMatch.player1)).returning();
+
+                    await ctx.db.update(players).set({
+                        topCutMatchPlacement: (2 ** (event.numOfTopCutRounds - currentRound))
+                    }).where(eq(players.id, newMatch.player2)).returning();
+                }
+            }
+
+            // check if all matches are played by checking of either player's score is greater than 0
+            const matchesForEvent = await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.eventId, input.eventId),
+                    eq(matches.finalStageMatch, true),
+                    and(
+                        eq(matches.player1Score, 0),
+                        eq(matches.player2Score, 0)
+                    )
+                )
+            })
+
+            if(matchesForEvent.length === 0){
+                await ctx.db.update(events).set({
+                    promptToCompleteFinalStage: true
+                }).where(eq(events.id, input.eventId));
+            } else {
+                await ctx.db.update(events).set({
+                    promptToCompleteFinalStage: false
+                }).where(eq(events.id, input.eventId));
             }
 
             return 
 
         }),
+
 
 
     // create: publicProcedure

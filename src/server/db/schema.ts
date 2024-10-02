@@ -50,7 +50,8 @@ export const events = createTable(
     promptToCompleteFirstStage: boolean("is_first_stage_complete").default(false),
     isFirstStageComplete: boolean("is_first_stage_locked_in").default(false),
     numOfTopCutRounds: integer("num_of_top_cut_rounds").notNull().default(0),
-    isFinalStageComplete: boolean("is_final_stage_complete").default(false),
+    promptToCompleteFinalStage: boolean("is_final_stage_complete").default(false),
+    isFinalStageComplete: boolean("is_final_stage_locked_in").default(false),
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),
@@ -78,6 +79,7 @@ export const players = createTable(
     groupId: integer("group_id").references(() => groups.id),
     numberOfWins: integer("number_of_wins").default(0),
     totalScore: integer("total_score").default(0),
+    topCutMatchPlacement: integer("top_cut_match_placement").default(0),
   }
 )
 

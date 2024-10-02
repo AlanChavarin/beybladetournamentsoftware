@@ -62,50 +62,7 @@ export const eventRouter = createTRPCRouter({
         .where(eq(events.id, input.id))
         .returning();
     }),
-  
-  // addPlayer: publicProcedure
-  //   .input(z.object({ id: z.number(), player: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     // throw an error if the event doesnt exist
-  //     const event = await ctx.db.query.events.findFirst({
-  //       where: eq(events.id, input.id)
-  //     })
-  //     if (!event) {
-  //       throw new Error("Event not found");
-  //     }
-  //     if (event?.players.includes(input.player)) {
-  //       throw new Error("Player already in event");
-  //     }
-  //     return ctx.db.update(events)
-  //       .set({ 
-  //         players: sql`array_append(${events.players}, ${input.player})`
-  //       })
-  //       .where(eq(events.id, input.id))
-  //       .returning();
-  //   }),
 
-  // removePlayer: publicProcedure
-  //   .input(z.object({ id: z.number(), player: z.string() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     // Remove player from event logic
-  //     return ctx.db.update(events)
-  //       .set({ 
-  //         players: sql`array_remove(${events.players}, ${input.player})`
-  //       })
-  //       .where(eq(events.id, input.id))
-  //       .returning();
-  //   }),
-
-  // updateNumOfGroups: publicProcedure
-  //   .input(z.object({ id: z.number(), numOfGroups: z.number() }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     return ctx.db.update(events)
-  //       .set({ 
-  //         numOfGroups: input.numOfGroups
-  //       })
-  //       .where(eq(events.id, input.id))
-  //       .returning();
-  //   }),
 
   updateGroupSettings: publicProcedure
     .input(z.object({ id: z.number(), numOfGroups: z.number(), howManyFromEachGroupAdvance: z.number() }))
@@ -210,151 +167,151 @@ export const eventRouter = createTRPCRouter({
       return updatedEvent;
     }),
 
-    checkIfFirstStageIsComplete: publicProcedure
-    .input(z.object({ eventId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
+  checkIfFirstStageIsComplete: publicProcedure
+      .input(z.object({ eventId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
 
-      const event = await ctx.db.query.events.findFirst({
-        where: eq(events.id, input.eventId),
-      });
+        const event = await ctx.db.query.events.findFirst({
+          where: eq(events.id, input.eventId),
+        });
 
-      if(!event){
-        throw new Error("Event not found");
-      }
-
-      if(!event.promptToCompleteFirstStage){
-        throw new Error("Event is not ready or prompted to complete first stage");
-      }
-
-      // check if all matches are played by checking of either player's score is greater than 0
-      const matchesForEvent = await ctx.db.query.matches.findMany({
-        where: and(
-            eq(matches.eventId, input.eventId),
-            and(
-                eq(matches.player1Score, 0),
-                eq(matches.player2Score, 0)
-            )
-        )
-
-      })
-
-      // if all matches are played, set the event's isFirstStageComplete to true
-      if(matchesForEvent.length === 0){
-          await ctx.db.update(events).set({
-              isFirstStageComplete: true
-          }).where(eq(events.id, input.eventId));
-      }
-
-      // GENERATE FINAL STAGE MATCHES
-      let topCutPlayers: PlayerType[] = []
-
-      if(!event.numOfGroups){
-        throw new Error("Event does not have any groups");
-      }
-
-      if(!event.howManyFromEachGroupAdvance){
-        throw new Error("Event does not have any players to advance");
-      }
-      
-      const numOfPlayersToAdvance: number = event.howManyFromEachGroupAdvance
-
-      const groupsFromEvent: GroupType[] = await ctx.db.query.groups.findMany({
-        where: eq(groups.eventId, input.eventId),
-      })
-
-      if(!groupsFromEvent){
-        throw new Error("Event does not have any groups");
-      }
-      
-      const topPlayersPromises = groupsFromEvent.map(group => 
-        ctx.db.query.players.findMany({
-          where: eq(players.groupId, group.id),
-          orderBy: [desc(players.numberOfWins), desc(players.totalScore)],
-          limit: numOfPlayersToAdvance
-        })
-      );
-
-      const topPlayersGroups = await Promise.all(topPlayersPromises);
-      topCutPlayers = topPlayersGroups.flat();
-
-      //console.log("topCutPlayers", topCutPlayers);
-
-      //create the matches using our topCutPlayers
-
-      // check that the number of players is a power of 2
-      if(!Number.isInteger(Math.log2(topCutPlayers.length))){
-        throw new Error("Number of players is not a power of 2");
-      }
-
-      topCutPlayers.sort((a, b) => (a.numberOfWins || 0) - (b.numberOfWins || 0)).sort((a, b) => (a.totalScore || 0) - (b.totalScore || 0));
-
-      const topCutRounds = Math.log2(topCutPlayers.length)
-
-      let matchesIdArray: (number | null)[] = []
-
-      for(let i = 0; i < topCutRounds; i++){
-
-        let matchesToCreate: {
-            eventId: number;
-            player1: number | null;
-            player2: number | null;
-            player1Score: number;
-            player2Score: number;
-            finalStageMatch: boolean;
-            nextTopCutMatchId: number | null;
-            topCutPlayerSlotToMoveTo: number;
-            round: number;
-            table: number;
-        }[] = []
-
-
-        for(let j = 0; j < (2 ** i); j++){
-
-          let nextTopCutMatchId: number | null = null
-
-          if(i !== 0){
-            const tempMatchId = matchesIdArray[Math.floor((matchesIdArray.length + j - 1)/2)]
-            if(tempMatchId){
-              nextTopCutMatchId = tempMatchId
-            }
-          }
-
-          let player1: number | null = null
-          let player2: number | null = null
-
-          if(i === topCutRounds-1){
-            const tempPlayer1 = topCutPlayers[j]
-            const tempPlayer2 = topCutPlayers[topCutPlayers.length - 1 - j]
-          
-            if(tempPlayer1 && tempPlayer2){
-              player1 = tempPlayer1.id
-              player2 = tempPlayer2.id
-            }
-          }
-
-          matchesToCreate.push({
-            eventId: input.eventId,
-            player1: player1,
-            player2: player2,
-            player1Score: 0,
-            player2Score: 0,
-            finalStageMatch: true,
-            nextTopCutMatchId: nextTopCutMatchId,
-            topCutPlayerSlotToMoveTo: (j % 2) + 1,
-            round: topCutRounds - i,
-            table: j + 1, 
-          })
+        if(!event){
+          throw new Error("Event not found");
         }
 
-        await ctx.db.update(events).set({
-          numOfTopCutRounds: topCutRounds
-        }).where(eq(events.id, input.eventId));
+        if(!event.promptToCompleteFirstStage){
+          throw new Error("Event is not ready or prompted to complete first stage");
+        }
 
-        const createdMatches: MatchType[] = await ctx.db.insert(matches).values(matchesToCreate).returning();
+        // check if all matches are played by checking of either player's score is greater than 0
+        const matchesForEvent = await ctx.db.query.matches.findMany({
+          where: and(
+              eq(matches.eventId, input.eventId),
+              and(
+                  eq(matches.player1Score, 0),
+                  eq(matches.player2Score, 0)
+              )
+          )
 
-        matchesIdArray = matchesIdArray.concat(createdMatches.map(match => match.id))
+        })
 
-      }
+        // if all matches are played, set the event's isFirstStageComplete to true
+        if(matchesForEvent.length === 0){
+            await ctx.db.update(events).set({
+                isFirstStageComplete: true
+            }).where(eq(events.id, input.eventId));
+        }
+
+        // GENERATE FINAL STAGE MATCHES
+        let topCutPlayers: PlayerType[] = []
+
+        if(!event.numOfGroups){
+          throw new Error("Event does not have any groups");
+        }
+
+        if(!event.howManyFromEachGroupAdvance){
+          throw new Error("Event does not have any players to advance");
+        }
+        
+        const numOfPlayersToAdvance: number = event.howManyFromEachGroupAdvance
+
+        const groupsFromEvent: GroupType[] = await ctx.db.query.groups.findMany({
+          where: eq(groups.eventId, input.eventId),
+        })
+
+        if(!groupsFromEvent){
+          throw new Error("Event does not have any groups");
+        }
+        
+        const topPlayersPromises = groupsFromEvent.map(group => 
+          ctx.db.query.players.findMany({
+            where: eq(players.groupId, group.id),
+            orderBy: [desc(players.numberOfWins), desc(players.totalScore)],
+            limit: numOfPlayersToAdvance
+          })
+        );
+
+        const topPlayersGroups = await Promise.all(topPlayersPromises);
+        topCutPlayers = topPlayersGroups.flat();
+
+        //console.log("topCutPlayers", topCutPlayers);
+
+        //create the matches using our topCutPlayers
+
+        // check that the number of players is a power of 2
+        if(!Number.isInteger(Math.log2(topCutPlayers.length))){
+          throw new Error("Number of players is not a power of 2");
+        }
+
+        topCutPlayers.sort((a, b) => (a.numberOfWins || 0) - (b.numberOfWins || 0)).sort((a, b) => (a.totalScore || 0) - (b.totalScore || 0));
+
+        const topCutRounds = Math.log2(topCutPlayers.length)
+
+        let matchesIdArray: (number | null)[] = []
+
+        for(let i = 0; i < topCutRounds; i++){
+
+          let matchesToCreate: {
+              eventId: number;
+              player1: number | null;
+              player2: number | null;
+              player1Score: number;
+              player2Score: number;
+              finalStageMatch: boolean;
+              nextTopCutMatchId: number | null;
+              topCutPlayerSlotToMoveTo: number;
+              round: number;
+              table: number;
+          }[] = []
+
+
+          for(let j = 0; j < (2 ** i); j++){
+
+            let nextTopCutMatchId: number | null = null
+
+            if(i !== 0){
+              const tempMatchId = matchesIdArray[Math.floor((matchesIdArray.length + j - 1)/2)]
+              if(tempMatchId){
+                nextTopCutMatchId = tempMatchId
+              }
+            }
+
+            let player1: number | null = null
+            let player2: number | null = null
+
+            if(i === topCutRounds-1){
+              const tempPlayer1 = topCutPlayers[j]
+              const tempPlayer2 = topCutPlayers[topCutPlayers.length - 1 - j]
+            
+              if(tempPlayer1 && tempPlayer2){
+                player1 = tempPlayer1.id
+                player2 = tempPlayer2.id
+              }
+            }
+
+            matchesToCreate.push({
+              eventId: input.eventId,
+              player1: player1,
+              player2: player2,
+              player1Score: 0,
+              player2Score: 0,
+              finalStageMatch: true,
+              nextTopCutMatchId: nextTopCutMatchId,
+              topCutPlayerSlotToMoveTo: (j % 2) + 1,
+              round: topCutRounds - i,
+              table: j + 1, 
+            })
+          }
+
+          await ctx.db.update(events).set({
+            numOfTopCutRounds: topCutRounds
+          }).where(eq(events.id, input.eventId));
+
+          const createdMatches: MatchType[] = await ctx.db.insert(matches).values(matchesToCreate).returning();
+
+          matchesIdArray = matchesIdArray.concat(createdMatches.map(match => match.id))
+
+        }
 
 
 
@@ -386,5 +343,26 @@ export const eventRouter = createTRPCRouter({
       return {
         isFirstStageComplete: event.isFirstStageComplete
       }
+    }),
+
+  checkIfFinalStageIsComplete: publicProcedure
+    .input(z.object({ eventId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const event = await ctx.db.query.events.findFirst({
+        where: eq(events.id, input.eventId),
+      });
+
+      if(!event){
+        throw new Error("Event not found");
+      }
+
+      if(!event.promptToCompleteFinalStage){
+        throw new Error("First stage is not set to be completed");
+      }
+
+      const [newEvent] = await ctx.db.update(events).set({
+        isFinalStageComplete: true
+      }).where(eq(events.id, input.eventId)).returning();
+
     }),
 });

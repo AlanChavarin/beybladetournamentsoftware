@@ -1,0 +1,1 @@
+ALTER TABLE "beybladetournamentsoftware_player" ADD COLUMN "top_cut_match_placement" integer DEFAULT 0;
