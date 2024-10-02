@@ -78,7 +78,7 @@ function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: 
                 </button>
             </div>
         </div>
-        {openMatch && <MatchScoreForm openMatch={openMatch} setOpenMatch={setOpenMatch} />}
+        {openMatch && <MatchScoreForm mode="firstStage" openMatch={openMatch} setOpenMatch={setOpenMatch} />}
 
     </div>
   )

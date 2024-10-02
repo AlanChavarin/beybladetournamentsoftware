@@ -302,6 +302,7 @@ export const eventRouter = createTRPCRouter({
             player2Score: number;
             finalStageMatch: boolean;
             nextTopCutMatchId: number | null;
+            topCutPlayerSlotToMoveTo: number;
             round: number;
             table: number;
         }[] = []
@@ -339,6 +340,7 @@ export const eventRouter = createTRPCRouter({
             player2Score: 0,
             finalStageMatch: true,
             nextTopCutMatchId: nextTopCutMatchId,
+            topCutPlayerSlotToMoveTo: (j % 2) + 1,
             round: topCutRounds - i,
             table: j + 1, 
           })

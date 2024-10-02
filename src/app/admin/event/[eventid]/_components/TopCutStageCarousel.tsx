@@ -74,7 +74,7 @@ function TopCutStageCarousel({topCutMatchesWithPlayers}: {topCutMatchesWithPlaye
                 </button>
             </div>
         </div>
-        {openMatch && <MatchScoreForm openMatch={openMatch} setOpenMatch={setOpenMatch} />}
+        {openMatch && <MatchScoreForm mode="finalStage" openMatch={openMatch} setOpenMatch={setOpenMatch} />}
 
     </div>
   )

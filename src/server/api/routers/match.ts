@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { matches, events, MatchType, groups, players, GroupWithPlayersType, MatchWithPlayersType } from "~/server/db/schema";
-import { eq, sql, asc, and, or, gt } from "drizzle-orm";
+import { eq, sql, asc, and, or, gt, desc } from "drizzle-orm";
 import createRoundRobin from "~/server/createRoundRobin";
 
 export const matchRouter = createTRPCRouter({
@@ -77,6 +77,18 @@ export const matchRouter = createTRPCRouter({
 
             if(event.isFirstStageComplete){
                 throw new Error("First stage is already complete");
+            }
+
+            const matchData = await ctx.db.query.matches.findFirst({
+                where: eq(matches.id, input.matchId)
+            })
+
+            if(!matchData){
+                throw new Error("Match not found");
+            }
+
+            if(matchData.finalStageMatch){
+                throw new Error("Final stage match scores cannot be set on this endpoint");
             }
 
             const [newMatch] = await ctx.db.update(matches).set({ player1Score: input.player1Score, player2Score: input.player2Score }).where(eq(matches.id, input.matchId)).returning();
@@ -302,7 +314,83 @@ export const matchRouter = createTRPCRouter({
             }
 
             return sortedTopCutMatches;
-        })
+        }),
+
+    setFinalStageMatchResult: publicProcedure
+        .input(z.object({
+            matchId: z.number(),
+            eventId: z.number(),
+            player1Id: z.number(),
+            player2Id: z.number(),
+            player1Score: z.number(),
+            player2Score: z.number()
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const event = await ctx.db.query.events.findFirst({
+                where: eq(events.id, input.eventId)
+            })
+
+            if(!event){
+                throw new Error("Event not found");
+            }
+
+            const matchData = await ctx.db.query.matches.findFirst({
+                where: eq(matches.id, input.matchId)
+            })
+
+            if(!matchData){
+                throw new Error("Match not found");
+            }
+
+            if(!matchData.finalStageMatch){
+                throw new Error("Must be a final stage match");
+            }
+            
+            const [newMatch] = await ctx.db.update(matches).set({ player1Score: input.player1Score, player2Score: input.player2Score }).where(eq(matches.id, input.matchId)).returning();
+
+            if(!newMatch || newMatch.player1Score === null || newMatch.player2Score === null){
+                throw new Error("Failed to update match");
+            }
+
+            if(newMatch.nextTopCutMatchId === null){
+                return
+            }
+
+            const nextTopCutMatch = await ctx.db.query.matches.findFirst({
+                where: eq(matches.id, newMatch.nextTopCutMatchId)
+            })
+            
+            console.log(nextTopCutMatch?.topCutPlayerSlotToMoveTo)
+
+            if(!nextTopCutMatch){
+                throw new Error("Next top cut match not found");
+            }
+
+            if(newMatch.player1Score > newMatch.player2Score){
+                if(newMatch.topCutPlayerSlotToMoveTo === 1){
+                    await ctx.db.update(matches).set({
+                        player1: newMatch.player1,
+                    }).where(eq(matches.id, nextTopCutMatch.id)).returning();
+                } else if(newMatch.topCutPlayerSlotToMoveTo === 2){
+                    await ctx.db.update(matches).set({
+                        player2: newMatch.player1,
+                    }).where(eq(matches.id, nextTopCutMatch.id)).returning();
+                }
+            } else if (newMatch.player2Score > newMatch.player1Score){
+                if(newMatch.topCutPlayerSlotToMoveTo === 1){
+                    await ctx.db.update(matches).set({
+                        player1: newMatch.player2,
+                    }).where(eq(matches.id, nextTopCutMatch.id)).returning();
+                } else if(newMatch.topCutPlayerSlotToMoveTo === 2){
+                    await ctx.db.update(matches).set({
+                        player2: newMatch.player2,
+                    }).where(eq(matches.id, nextTopCutMatch.id)).returning();
+                }
+            }
+
+            return 
+
+        }),
 
 
     // create: publicProcedure

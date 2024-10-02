@@ -96,7 +96,8 @@ export const matches = createTable(
     round: integer("round"),
     table: integer("table"),
     finalStageMatch: boolean("final_stage_match").default(false),
-    nextTopCutMatchId: integer("nextTopCutMatch_id")
+    nextTopCutMatchId: integer("nextTopCutMatch_id"),
+    topCutPlayerSlotToMoveTo: integer("top_cut_player_slot_to_move_to").default(0)
   }
 )
 

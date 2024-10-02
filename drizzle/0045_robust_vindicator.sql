@@ -1,0 +1,2 @@
+ALTER TABLE "beybladetournamentsoftware_event" ALTER COLUMN "num_of_top_cut_rounds" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "beybladetournamentsoftware_match" ADD COLUMN "top_cut_player_slot_to_move_to" integer DEFAULT 0;

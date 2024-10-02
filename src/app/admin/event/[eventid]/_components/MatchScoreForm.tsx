@@ -17,9 +17,9 @@ const formSchema = z.object({
 
 type FormSchemaType = z.infer<typeof formSchema>
 
-function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersType | undefined, setOpenMatch: (match: MatchWithPlayersType | undefined) => void}) {
+function MatchScoreForm({mode, openMatch, setOpenMatch}: {mode: "firstStage" | "finalStage", openMatch: MatchWithPlayersType | undefined, setOpenMatch: (match: MatchWithPlayersType | undefined) => void}) {
 
-    const updateMatch = api.match.setMatchResult.useMutation()
+    const updateMatch = mode === "firstStage" ? api.match.setMatchResult.useMutation() : api.match.setFinalStageMatchResult.useMutation()
     const utils = api.useUtils()
 
     const form = useForm<FormSchemaType>({
@@ -57,6 +57,7 @@ function MatchScoreForm({openMatch, setOpenMatch}: {openMatch: MatchWithPlayersT
             utils.player.getPlayersByEventId.invalidate({eventId: openMatch.eventId})
             utils.group.getGroupsWithPlayersByEventId.invalidate({eventId: openMatch.eventId})
             utils.event.getById.invalidate({id: openMatch.eventId})
+            utils.match.getTopCutMatchesWithPlayers.invalidate({eventId: openMatch.eventId})
             setOpenMatch(undefined)
         } catch (error) {
             toast.error((error as Error).message)
