@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { matches, events, MatchType, groups, players, GroupWithPlayersType } from "~/server/db/schema";
+import { matches, events, MatchType, groups, players, GroupWithPlayersType, MatchWithPlayersType } from "~/server/db/schema";
 import { eq, sql, asc, and, or, gt } from "drizzle-orm";
 import createRoundRobin from "~/server/createRoundRobin";
 
@@ -258,6 +258,51 @@ export const matchRouter = createTRPCRouter({
             }
 
         }),
+
+    getTopCutMatchesWithPlayers: publicProcedure
+        .input(z.object({
+            eventId: z.number()
+        }))
+        .query(async ({ ctx, input }) => {
+            const event = await ctx.db.query.events.findFirst({
+                where: eq(events.id, input.eventId)
+            })
+
+            if(!event){
+                throw new Error("Event not found");
+            }
+
+            const topCutMatches: MatchWithPlayersType[] = await ctx.db.query.matches.findMany({
+                where: and(
+                    eq(matches.eventId, input.eventId),
+                    eq(matches.finalStageMatch, true)
+                ),
+                with: {
+                    player1: true,
+                    player2: true
+                },
+                orderBy: [asc(matches.round), asc(matches.table)]
+            }) as MatchWithPlayersType[];
+
+            let sortedTopCutMatches: MatchWithPlayersType[][] = Array(event.numOfTopCutRounds)
+                .fill(null)
+                .map(() => []);
+
+            let matchIndex = 0;
+            for (let i = 0; i < event.numOfTopCutRounds; i++) {
+                const matchesInRound = 2 ** (event.numOfTopCutRounds - i - 1);
+                for (let j = 0; j < matchesInRound; j++) {
+                    const sortedTopCutMatchesArray = sortedTopCutMatches[i];
+                    const topCutMatch = topCutMatches[matchIndex];
+                    if (matchIndex < topCutMatches.length && sortedTopCutMatchesArray && topCutMatch) {
+                        sortedTopCutMatchesArray.push(topCutMatch);
+                        matchIndex++;
+                    }
+                }
+            }
+
+            return sortedTopCutMatches;
+        })
 
 
     // create: publicProcedure

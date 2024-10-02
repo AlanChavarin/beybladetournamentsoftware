@@ -309,6 +309,13 @@
       "when": 1727786827244,
       "tag": "0043_youthful_mastermind",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "6",
+      "when": 1727848521258,
+      "tag": "0044_lyrical_maximus",
+      "breakpoints": true
     }
   ]
 }

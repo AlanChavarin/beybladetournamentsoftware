@@ -1,10 +1,11 @@
-import FirstStageGroupCarousel from "./FirstStageGroupCarousel"
+import { MatchType, MatchWithPlayersType } from "~/server/db/schema"
+import TopCutStageCarousel from "./TopCutStageCarousel"
 
-function FinalStage() {
+
+function FinalStage({topCutMatchesWithPlayers}: {topCutMatchesWithPlayers: MatchWithPlayersType[][] | undefined}) {
   return (
     <div className="flex flex-col items-center gap-[14px] p-[8px]">
-        {/* <FirstStageGroupCarousel /> */}
-        Final Stage
+        <TopCutStageCarousel topCutMatchesWithPlayers={topCutMatchesWithPlayers || []} />
     </div>
   )
 }

@@ -49,7 +49,8 @@ export const events = createTable(
     howManyFromEachGroupAdvance: integer("how_many_from_each_group_advance").default(2),
     promptToCompleteFirstStage: boolean("is_first_stage_complete").default(false),
     isFirstStageComplete: boolean("is_first_stage_locked_in").default(false),
-
+    numOfTopCutRounds: integer("num_of_top_cut_rounds").notNull().default(0),
+    isFinalStageComplete: boolean("is_final_stage_complete").default(false),
   },
   (example) => ({
     nameIndex: index("name_idx").on(example.name),

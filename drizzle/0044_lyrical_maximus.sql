@@ -1,0 +1,2 @@
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "num_of_top_cut_rounds" integer DEFAULT 0;--> statement-breakpoint
+ALTER TABLE "beybladetournamentsoftware_event" ADD COLUMN "is_final_stage_complete" boolean DEFAULT false;

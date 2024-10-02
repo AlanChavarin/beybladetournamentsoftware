@@ -1,16 +1,14 @@
-'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
-import { EventType, formattedGroupWithMatchesWithPlayersType, GroupType, GroupWithMatchesWithPlayersType, MatchWithPlayersType } from '~/server/db/schema'
-import MatchScoreForm from './MatchScoreForm'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheck, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
-import { DotButton, useDotButton } from '~/app/_components/EmblaCarouselDotButton'
-import GroupCarouselItem from './GroupCarouselItem'
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import useEmblaCarousel from "embla-carousel-react"
+import { useState } from "react"
+import { DotButton, useDotButton } from "~/app/_components/EmblaCarouselDotButton"
+import { MatchType, MatchWithPlayersType } from "~/server/db/schema"
+import MatchScoreForm from "./MatchScoreForm"
+import GroupCarouselItem from "./GroupCarouselItem"
 
 
-// turn this into a functional component
-function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: {event: EventType, formattedGroupWithMatchesWithPlayers: formattedGroupWithMatchesWithPlayersType}) {
+function TopCutStageCarousel({topCutMatchesWithPlayers}: {topCutMatchesWithPlayers: MatchWithPlayersType[][]}) {
     const [emblaRef, emblaApi] = useEmblaCarousel({ 
         loop: false,
         startIndex: 0
@@ -29,9 +27,7 @@ function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: 
     const [openMatch, setOpenMatch] = useState<MatchWithPlayersType | undefined>(undefined)
 
     const handleClick = (match: MatchWithPlayersType) => { 
-        if(!event.isFirstStageComplete){
-            setOpenMatch(match)
-        }
+        setOpenMatch(match)
     }
 
 
@@ -39,7 +35,7 @@ function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: 
     <div className="flex flex-col w-full box-shadow-small2">
         <div className="bg-darkGray text-white font-rubik w-full py-[4px] px-[12px] text-[14px] relative">
             <div className="relative z-[1]">
-                Group {formattedGroupWithMatchesWithPlayers.groupLetter} | Round {selectedIndex + 1}
+                Final Stage
             </div>
             <div className="absolute left-[4px] top-[50%] translate-y-[-50%] z-0">
                 <img src="/svgs/redThingy.svg" alt="redThingy" className="w-[24px] h-[24px]" />
@@ -49,7 +45,7 @@ function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: 
             <div className="embla">
                 <div className="embla__viewport text-white flex justify-center" ref={emblaRef}>
                     <div className="embla__container gap-[16px] max-w-[300px] py-[16px]">
-                        {formattedGroupWithMatchesWithPlayers.matches && formattedGroupWithMatchesWithPlayers.matches.map((round, index) => (
+                        {topCutMatchesWithPlayers.map((round, index) => (
                             <div className="embla__slide flex flex-col gap-[8px]" key={index}>
                                 {round.map((match, matchIndex) => (
                                     <GroupCarouselItem handleClick={handleClick} key={matchIndex} match={match} />
@@ -83,4 +79,4 @@ function FirstStageGroupCarousel({event, formattedGroupWithMatchesWithPlayers}: 
     </div>
   )
 }
-export default FirstStageGroupCarousel
+export default TopCutStageCarousel

@@ -318,18 +318,35 @@ export const eventRouter = createTRPCRouter({
             }
           }
 
+          let player1: number | null = null
+          let player2: number | null = null
+
+          if(i === topCutRounds-1){
+            const tempPlayer1 = topCutPlayers[j]
+            const tempPlayer2 = topCutPlayers[topCutPlayers.length - 1 - j]
+          
+            if(tempPlayer1 && tempPlayer2){
+              player1 = tempPlayer1.id
+              player2 = tempPlayer2.id
+            }
+          }
+
           matchesToCreate.push({
             eventId: input.eventId,
-            player1: null,
-            player2: null,
+            player1: player1,
+            player2: player2,
             player1Score: 0,
             player2Score: 0,
             finalStageMatch: true,
             nextTopCutMatchId: nextTopCutMatchId,
-            round: i + 1,
+            round: topCutRounds - i,
             table: j + 1, 
           })
         }
+
+        await ctx.db.update(events).set({
+          numOfTopCutRounds: topCutRounds
+        }).where(eq(events.id, input.eventId));
 
         const createdMatches: MatchType[] = await ctx.db.insert(matches).values(matchesToCreate).returning();
 

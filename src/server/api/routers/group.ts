@@ -66,6 +66,7 @@ export const groupRouter = createTRPCRouter({
                 where: eq(groups.eventId, input.eventId),
                 with: {
                     matches: {
+                        where: eq(matches.finalStageMatch, false),
                         with: {
                             player1: true,
                             player2: true,

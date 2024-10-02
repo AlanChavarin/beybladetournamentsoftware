@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import EventThumbnailComponent from "~/app/_components/EventThumbnailComponent"
-import { EventType, GroupType, formattedGroupWithMatchesWithPlayersType, GroupWithMatchesWithPlayersType, MatchType, PlayerType, GroupWithPlayersType } from "~/server/db/schema"
+import { EventType, GroupType, formattedGroupWithMatchesWithPlayersType, GroupWithMatchesWithPlayersType, MatchType, PlayerType, GroupWithPlayersType, MatchWithPlayersType } from "~/server/db/schema"
 import { api } from "~/trpc/react"
 import { useRouter, useSearchParams } from 'next/navigation'
 import StandingsTab from './_components/StandingsTab'
@@ -17,6 +17,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
   const [groups, setGroups] = useState<GroupType[] | undefined>(undefined)
   const [groupsWithPlayers, setGroupsWithPlayers] = useState<GroupWithPlayersType[] | undefined>(undefined)
   const [formattedGroupsWithMatchesWithPlayers, setFormattedGroupsWithMatchesWithPlayers] = useState<formattedGroupWithMatchesWithPlayersType[] | undefined>(undefined)
+  const [topCutMatchesWithPlayers, setTopCutMatchesWithPlayers] = useState<MatchWithPlayersType[][] | undefined>(undefined)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -36,7 +37,7 @@ const Page = ({ params }: { params: { eventid: string } }) => {
         case 'Group Stage':
             return <GroupStage event={event} formattedGroupsWithMatchesWithPlayers={formattedGroupsWithMatchesWithPlayers || []}/>
         case 'Final Stage':
-            return <FinalStage/>
+            return <FinalStage topCutMatchesWithPlayers={topCutMatchesWithPlayers || []}/>
         default:
             return <>None</>
     }
@@ -45,10 +46,9 @@ const Page = ({ params }: { params: { eventid: string } }) => {
   const { data: fetchedEvent, isLoading } = api.event.getById.useQuery({ id: parseInt(eventid) })
   const { data: fetchedPlayers, isLoading: isLoadingPlayers } = api.player.getPlayersByEventId.useQuery({ eventId: parseInt(eventid) })
   const { data: fetchedGroups, isLoading: isLoadingGroups } = api.group.getGroupsByEventId.useQuery({ eventId: parseInt(eventid)})
-
   const { data: fetchedGroupsWithPlayers, isLoading: isLoadingGroupsWithPlayers } = api.group.getGroupsWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
-
   const { data: fetchedGroupsWithMatchesWithPlayers, isLoading: isLoadingGroupsWithMatchesWithPlayers } = api.group.getGroupsWithMatchesWithPlayersByEventId.useQuery({ eventId: parseInt(eventid)})
+  const { data: fetchedTopCutMatchesWithPlayers, isLoading: isLoadingTopCutMatchesWithPlayers } = api.match.getTopCutMatchesWithPlayers.useQuery({ eventId: parseInt(eventid)})
 
   useEffect(() => {
     if (fetchedEvent) {
@@ -67,8 +67,11 @@ const Page = ({ params }: { params: { eventid: string } }) => {
     if (fetchedGroupsWithMatchesWithPlayers) {
       setFormattedGroupsWithMatchesWithPlayers(fetchedGroupsWithMatchesWithPlayers)
     }
+    if (fetchedTopCutMatchesWithPlayers) {
+      setTopCutMatchesWithPlayers(fetchedTopCutMatchesWithPlayers)
+    }
     //setGroupsWithMatches(fetchedGroupsWithMatches)
-  }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers, fetchedGroupsWithMatchesWithPlayers])
+  }, [fetchedEvent, fetchedPlayers, fetchedGroups, fetchedGroupsWithPlayers, fetchedGroupsWithMatchesWithPlayers, fetchedTopCutMatchesWithPlayers])
 
   return (
     <div className="flex flex-col items-center gap-[8px]">
